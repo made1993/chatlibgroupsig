@@ -1,6 +1,7 @@
 #ifndef _SOCKET_H
 #define _SOCKET_H
- #include <stdio.h>
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <pcap.h>
 #include <string.h>
