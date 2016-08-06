@@ -243,7 +243,6 @@ int abrirBind(int sockfd,int puerto){
 	ip4addr.sin_family = AF_INET;
 	ip4addr.sin_port = htons(puerto);
 	ip4addr.sin_addr.s_addr=INADDR_ANY;
-	//bzero((void  *)&(ip4addr.sin_zero), 8);
 	if(bind(sockfd, (struct sockaddr*)&ip4addr, sizeof(ip4addr))==-1){
 		switch(errno){
 			case EACCES:

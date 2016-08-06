@@ -31,6 +31,7 @@ void* hiloEscritura(void* args){
 	return NULL;
 }
 
+
 void* hiloLectura(void* args){
 	char* msg= malloc(8096);
 	if(sockfd ==-1)
@@ -51,7 +52,7 @@ int main(int argc , char *argv[]){
 
 	/*Comenzamos la conexion TCP*/
 	printf("se obtiene informacion\n");
-	if(0!=getaddrinfo("192.168.1.42", "8080", &hints, &res)){
+	if(0!=getaddrinfo("127.0.0.1", "8080", &hints, &res)){
 		return 0;
 	}
 	printf("socket\n");

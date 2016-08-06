@@ -26,6 +26,7 @@ void* lecturaUsuario(void* args){
 	return NULL;
 }
 
+
 int main(){
 	int socket;
 	int* socketcli;

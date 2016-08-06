@@ -1,0 +1,56 @@
+#include "../include/usuario.h"
+
+int nUsr = 0;
+
+Usuario_t* crearUsuario(int* socket){
+	Usuario_t* usr = NULL;
+
+	if (socket == NULL || *socket <= 0)
+		return NULL;
+	usr = malloc(sizeof(Usuario_t));
+	usr->id = nUsr++;
+	usr->nick = malloc(7);
+	usr->socket = socket;
+	return usr;
+}
+
+int liberarUsuario(Usuario_t* usr){
+	if(usr == NULL)
+		return 1;
+	if(!(usr->nick == NULL))
+		free(usr->nick);
+	if(!(usr->socket == NULL))
+		free(usr->socket);
+	free(usr);
+	return 0; 
+}
+
+int setNick(Usuario_t* usr ,char* nick){
+	int len = 0;
+	if(nick == NULL)
+		return -1;
+	
+	if(usr->nick == NULL)
+		return -2;
+	
+	len = strlen(nick);
+	
+	if (len > 7 || len ==0)
+		return 1;
+
+	strcpy(usr->nick, nick);
+	return 0;
+}
+
+char* getNick(Usuario_t* usr){
+	if (usr == NULL)
+		return NULL;
+	return usr->nick;
+}
+
+int getId(Usuario_t* usr){
+	if(usr == NULL)
+		return -1;
+	return usr->id;
+
+}
