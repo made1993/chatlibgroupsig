@@ -4,10 +4,28 @@
 #include <arpa/inet.h> //inet_addr
 #include <unistd.h>	//write
 #include <pthread.h>
+
 #include "../include/conexion.h"
- 
+
+#include "../include/comandos.h"
+#include "../include/comandoss.h"
 pthread_t* hilos;
 
+
+void* verificarCliente(void* args){
+	int* socket = NULL;
+	char * buff = malloc(8096);
+	socket = (int*) args;
+	while(1){
+
+		if(recibir(*socket, buff) == -1)
+			break;
+		if(strlen(buff) == 0)
+			break;
+
+		printf("[%s]\n", buff);
+	}
+}
 void* lecturaUsuario(void* args){
 	int* socket = NULL;
 	char * buff = malloc(8096);

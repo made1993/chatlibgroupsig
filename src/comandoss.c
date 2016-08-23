@@ -33,14 +33,14 @@ int sendPong(Usuario_t* usr){
 
 }
 
-int sendMsg(Usuario_t*, char* nick, char* msg){
+int sendMsg(Usuario_t* usr, char* nick, char* msg){
 	
 	char* buff= NULL; 
 	int ret = 0;
 	if(usr==NULL || usr->socket == NULL
 		|| *usr->socket <= 0)
 		return -1;
-	if(nick == NULL || strlen(nick > 7) || msg == NULL)
+	if(nick == NULL || strlen(nick) > 7 || msg == NULL)
 		return -1;
 	buff = malloc(8+ strlen(nick)+strlen(msg));
 	buff= strcat("/msg ", nick);

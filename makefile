@@ -1,7 +1,7 @@
 
 FLAGS= -Wall
 
-all: obj/usuario.o obj/conexion.o obj/comandosu.o obj/comandoss.o
+all: obj/usuario.o obj/conexion.o obj/comandosu.o obj/comandoss.o obj/comandos.o
 
 
 obj/usuario.o:
@@ -18,6 +18,10 @@ obj/comandosu.o:
 
 obj/comandoss.o:
 	@gcc $(FLAGS) -c -o obj/comandoss.o src/comandoss.c
+
+
+obj/comandos.o:
+	@gcc $(FLAGS) -c -o obj/comandos.o src/comandos.c
 
 
 mrProper:

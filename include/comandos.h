@@ -16,5 +16,6 @@
 #define CPING 		"/PING"
 #define CPONG 		"/PONG"
 
+int comando(char* msg);
 
 #endif	
