@@ -27,7 +27,6 @@ mrProper:
 	@rm -f obj/*
 
 commit:
-	@echo $(msg)
 	@git add .
 	@git commit -m "$(msg)"
 	@git push
