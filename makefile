@@ -1,6 +1,5 @@
 
 FLAGS= -Wall
-
 all: obj/usuario.o obj/conexion.o obj/comandosu.o obj/comandoss.o obj/comandos.o
 
 
@@ -26,3 +25,8 @@ obj/comandos.o:
 
 mrProper:
 	@rm -f obj/*
+
+commit:
+	@git add .
+	@git commit -m $(msg)
+	@git push

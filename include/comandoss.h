@@ -14,8 +14,8 @@
 void* hiloPing(void* args);
 int sendPing(Usuario_t*);
 int sendPong(Usuario_t*);
-int sendMsg(Usuario_t*, char* nick, char* msg);
-int sendNick(Usuario_t*, char* nick);
+int sendMsg(Usuario_t*,  char* msg);
+int sendNick(Usuario_t*, char* newNick);
 
 
 int recvPing(Usuario_t*);

@@ -33,10 +33,11 @@ int sendPong(Usuario_t* usr){
 
 }
 
-int sendMsg(Usuario_t* usr, char* nick, char* msg){
+int sendMsg(Usuario_t* usr, char* msg){
 	
 	char* buff= NULL; 
 	int ret = 0;
+	char* nick= usr->nick;
 	if(usr==NULL || usr->socket == NULL
 		|| *usr->socket <= 0)
 		return -1;
@@ -51,7 +52,7 @@ int sendMsg(Usuario_t* usr, char* nick, char* msg){
 	return ret;	
 }
 
-int sendNick(Usuario_t*, char* nick, char* newNick){
+int sendNick(Usuario_t* usr, char* newNick){
 	
 	if(usr==NULL || usr->socket == NULL
 		|| *usr->socket <= 0)
