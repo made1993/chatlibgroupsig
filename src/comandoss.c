@@ -1,5 +1,5 @@
 #include "../include/comandoss.h"
-
+#include <time.h>
 
 void* hiloPing(void* args){
 	Usuario_t* usr = NULL;
@@ -59,4 +59,36 @@ int sendNick(Usuario_t* usr, char* newNick){
 		return -1;
 
 	return escribir(*usr->socket, "/nick");	
+}
+
+
+int recvNick(Usuario_t* usr, char* msg){
+	char* nick= NULL;
+	if (usr == NULL || msg== NULL)
+		return -1;
+	nick = msg + strlen(CNICK)+1;
+	return setNick(usr, nick);
+
+}
+
+int recvPing(Usuario_t* usr){
+	if(usr == NULL || usr->socket == NULL)
+		return -1;
+	return escribir(*usr->socket, CPONG);
+}
+
+int recvPong(Usuario_t* usr){
+	if(usr == NULL || usr->socket == NULL)
+		return -1;
+	
+	return 0;
+}
+void main(){
+	Usuario_t* usr= NULL;
+	int* socket = malloc(sizeof(int));
+	*socket= 5;
+	usr= crearUsuario(socket);
+	recvNick(usr, "/NICK mario");
+	printf("%s\n", usr->nick);
+	liberarUsuario(usr);
 }

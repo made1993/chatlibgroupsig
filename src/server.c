@@ -16,14 +16,24 @@ void* verificarCliente(void* args){
 	int* socket = NULL;
 	char * buff = malloc(8096);
 	socket = (int*) args;
+	Usaurio_t* usr = NULL;
+	usr = crearUsuario(socket);
 	while(1){
 
-		if(recibir(*socket, buff) == -1)
-			break;
-		if(strlen(buff) == 0)
-			break;
+		if(recibir(*socket, buff) == -1){
+			close(*socket);
+			return NULL;
+		}
+		if(strlen(buff) == 0){
+			close(*socket);
+			return NULL;
+		}
 
-		printf("[%s]\n", buff);
+		if(comando(buff)== NICK){
+			recvNick(usr, buff);
+			break;
+		}
+
 	}
 }
 void* lecturaUsuario(void* args){

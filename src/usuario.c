@@ -48,9 +48,30 @@ char* getNick(Usuario_t* usr){
 	return usr->nick;
 }
 
+int setId(Usuario_t* usr, int id){
+	if(usr == NULL)
+		return -1;
+	usr->id = id;
+	return 0;
+
+}
 int getId(Usuario_t* usr){
 	if(usr == NULL)
 		return -1;
 	return usr->id;
 
+}
+
+
+int setCurrentPingt(Usuario_t* usr){
+	if(usr == NULL)
+		return -1;
+	usr->pingt= (int) time(NULL);
+	return 0;
+}
+
+int getCurrentPingt(Usuario_t* usr){
+	if(usr == NULL)
+		return -1;
+	return usr->pingt;
 }

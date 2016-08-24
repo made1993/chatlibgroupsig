@@ -2,6 +2,7 @@
 #define COMANDOSS_H
 
 #include "conexion.h"
+#include "comandos.h"
 #include "usuario.h"
 /**
 *
@@ -21,7 +22,7 @@ int sendNick(Usuario_t*, char* newNick);
 int recvPing(Usuario_t*);
 int recvPong(Usuario_t*);
 int recvMsg(Usuario_t*, char* msg);
-int recvNick(Usuario_t*, char* nick);
+int recvNick(Usuario_t*, char* msg);
 
 
 #endif
