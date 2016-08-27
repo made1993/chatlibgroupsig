@@ -10,6 +10,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <pthread.h>
+#include <getopt.h>
 #include "../include/conexion.h"
  
 
@@ -43,16 +44,79 @@ void* hiloLectura(void* args){
 	return NULL;
 }
 
+int identificacion(char* nick){
+	
+}
+
 int main(int argc , char *argv[]){
 	char* msg= malloc(8096);
 	struct addrinfo hints, *res;
+	char opt;
+	int long_index=0;
+	char * ip = NULL;
+	char * port = NULL;
+	char * nick = NULL;
+	static struct option options[] = {
+        {"ip",required_argument,0, 1},
+        {"port",required_argument,0, 2},
+        {"nick",required_argument,0, 3},
+
+        {0,0,0,0}
+    };
+	while ((opt = getopt_long_only(argc, argv,"1:", options, &long_index )) != -1){
+		switch(opt){
+			case 1:
+				
+				ip = malloc(sizeof(char) * strlen(optarg) + 1);
+				strcpy(ip, optarg);				
+			break;
+			case 2:
+
+				port = malloc(sizeof(char) * strlen(optarg) + 1);
+				strcpy(port, optarg);
+
+			break;
+			case 3:
+				if (strlen(optarg)>7){
+					printf("La longuitud del nick debe ser menor de 7 caracteres\n");
+				}
+				nick = malloc(sizeof(char)*8);
+				strcpy(nick, optarg);
+
+			break;
+		}
+	}
+	/*
+	**	Chequeo de que los argumentos esten bien
+	**	
+	**
+	**
+	*/
+	if(ip == NULL){
+		printf("No se especifico la direccion destino\n");
+		printf("-ip arg -port arg -nick arg\n");
+		return 0;
+	}
+	if(port == NULL){
+
+		printf("No se especifico la puerto destino\n");
+		printf("-ip arg -port arg -nick arg\n");
+		return 0;	
+	}
+	if(nick == NULL){
+
+		printf("No se especifico el nick\n");
+		printf("-ip arg -port arg -nick arg\n");
+		return 0;
+	}
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
 	/*Comenzamos la conexion TCP*/
 	printf("se obtiene informacion\n");
-	if(0!=getaddrinfo("127.0.0.1", "8080", &hints, &res)){
+	if(0!=getaddrinfo(ip, port, &hints, &res)){
+		printf("No se pudo conectar con el servidor\n");
 		return 0;
 	}
 	printf("socket\n");
