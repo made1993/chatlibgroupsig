@@ -86,12 +86,7 @@ int main(int argc , char *argv[]){
 			break;
 		}
 	}
-	/*
-	**	Chequeo de que los argumentos esten bien
-	**	
-	**
-	**
-	*/
+	/*Chequeo de que los argumentos esten bien*/
 	if(ip == NULL){
 		printf("No se especifico la direccion destino\n");
 		printf("-ip arg -port arg -nick arg\n");
@@ -130,6 +125,8 @@ int main(int argc , char *argv[]){
 		return 0;
 	}
 
+	/*Conexion chat*/
+	
 	pthread_create(&h1,NULL, hiloLectura, (void *)NULL );
 
 	hiloEscritura(NULL);

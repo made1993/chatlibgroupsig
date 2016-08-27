@@ -3,10 +3,17 @@
 
 #include "usuario.h"
 #include "conexion.h"
+#include "comandos.h"
 
-int ping(int socket);
-int pong(int socket);
-int nick(int socket, char* nick);
-int disconnect(int socket);
+int sendPing(int socket);
+int sendPong(int socket);
+int sendNick(int socket, char* nick);
+int sendDisconnect(int socket);
+
+
+int recvPing(int socket);
+int recvPong(int socket);
+int recvNick(int socket, char* nick);
+int recvDisconnect(int socket);
 
 #endif

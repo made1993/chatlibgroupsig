@@ -22,14 +22,14 @@ int sendPing(Usuario_t* usr){
 	if(usr==NULL || usr->socket == NULL
 		|| *usr->socket <= 0)
 		return -1;
-	return escribir(*usr->socket, "/ping");
+	return escribir(*usr->socket, CPING);
 
 }
 int sendPong(Usuario_t* usr){
 	if(usr==NULL || usr->socket == NULL
 		|| *usr->socket <= 0)
 		return -1;
-	return escribir(*usr->socket, "/pong");
+	return escribir(*usr->socket, CPONG);
 
 }
 
@@ -44,7 +44,8 @@ int sendMsg(Usuario_t* usr, char* msg){
 	if(nick == NULL || strlen(nick) > 7 || msg == NULL)
 		return -1;
 	buff = malloc(8+ strlen(nick)+strlen(msg));
-	buff= strcat("/msg ", nick);
+	buff= strcat(CMSG, " ");
+	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
 	ret = escribir(*usr->socket, buff);
