@@ -53,14 +53,7 @@ int sendMsg(Usuario_t* usr, char* msg){
 	return ret;	
 }
 
-int sendNick(Usuario_t* usr, char* newNick){
-	
-	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket <= 0)
-		return -1;
 
-	return escribir(*usr->socket, "/nick");	
-}
 
 
 int recvNick(Usuario_t* usr, char* msg){
@@ -68,7 +61,10 @@ int recvNick(Usuario_t* usr, char* msg){
 	if (usr == NULL || msg== NULL)
 		return -1;
 	nick = msg + strlen(CNICK)+1;
-	return setNick(usr, nick);
+	setNick(usr, nick);
+
+
+	return 0;
 
 }
 
@@ -81,15 +77,12 @@ int recvPing(Usuario_t* usr){
 int recvPong(Usuario_t* usr){
 	if(usr == NULL || usr->socket == NULL)
 		return -1;
-	
+	setCurrentPingt(usr);
 	return 0;
 }
-void main(){
-	Usuario_t* usr= NULL;
-	int* socket = malloc(sizeof(int));
-	*socket= 5;
-	usr= crearUsuario(socket);
-	recvNick(usr, "/NICK mario");
-	printf("%s\n", usr->nick);
-	liberarUsuario(usr);
+
+
+int broadcastMsg(char * msg){
+
+	return 0;
 }

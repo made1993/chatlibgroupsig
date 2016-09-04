@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 
+
 /*Por ahora esto, pero es posible que haya que añadir cosas de claves*/
 typedef struct USUARIO
 {
@@ -29,6 +30,8 @@ int getId(Usuario_t* usr);
 
 int setCurrentPingt(Usuario_t* usr);
 int getCurrentPingt(Usuario_t* usr);
+
+int compareUsr(const void* usr1, const void* usr2);
 
 
 

@@ -11,9 +11,10 @@ int sendNick(int socket, char* nick);
 int sendDisconnect(int socket);
 
 
+int recvNick(int socket, char* nick);
+int recvMsg(int socket, char* nick);
+int recvDisconnect(int socket);
 int recvPing(int socket);
 int recvPong(int socket);
-int recvNick(int socket, char* nick);
-int recvDisconnect(int socket);
 
 #endif

@@ -1,22 +1,21 @@
 #include <stdio.h>
 #include <string.h>	//strlen
-#include <sys/socket.h>
 #include <arpa/inet.h> //inet_addr
 #include <unistd.h>	//write
 #include <pthread.h>
 
-#include "../include/conexion.h"
-
-#include "../include/comandos.h"
 #include "../include/comandoss.h"
+#include "../include/linkedList.h"
+
 pthread_t* hilos;
 
+LinkedList* listaUsuarios;
 
 void* verificarCliente(void* args){
 	int* socket = NULL;
 	char * buff = malloc(8096);
 	socket = (int*) args;
-	Usaurio_t* usr = NULL;
+	Usuario_t* usr = NULL;
 	usr = crearUsuario(socket);
 	while(1){
 
@@ -35,21 +34,52 @@ void* verificarCliente(void* args){
 		}
 
 	}
+	insert_list(listaUsuarios, usr);
+	return NULL;
 }
 void* lecturaUsuario(void* args){
-	int* socket = NULL;
+	Usuario_t* usr = NULL;
 	char * buff = malloc(8096);
-	socket = (int*) args;
+	usr = (Usuario_t*) args;
 	while(1){
 
-		if(recibir(*socket, buff) == -1)
+		if(recibir(*usr->socket, buff) == -1)
 			break;
 		if(strlen(buff) == 0)
 			break;
+		switch (comando(buff)){
+			case NICK:
+				recvNick(usr, buff);
+			break;
+
+			case MSG:
+				recvMsg(buff);
+			break;
+
+			case DISCONNECT:
+
+			break;
+
+			case PING:
+				recvPing(usr);
+			break;
+
+			case PONG:
+				recvPong(usr);
+			break;
+
+			default:
+
+			break;
+
+
+
+		}
 		printf("[%s]\n", buff);
 	}
 	printf("Usuario desconectado\n");
-	free(socket);
+	delete_elem_list( listaUsuarios,(void*) usr);
+	liberarUsuario(usr);
 	free(buff);
 	return NULL;
 }
@@ -71,6 +101,7 @@ int main(){
 	printf("Listen\n");
 	abrirListen(socket);
 
+	create_list(compareUsr);
 
 	while(1){
 		socketcli= malloc(sizeof(int));

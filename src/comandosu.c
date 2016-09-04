@@ -56,8 +56,3 @@ int recvDisconnect(int socket){
 }
 
 
-int main(int argc, char* argv){
-	char msg[] = "/NICK mario hola mundo de mierda mario asdas";
-	recvMsg(0, msg);
-	return 0;
-}

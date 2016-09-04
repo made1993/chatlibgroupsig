@@ -75,3 +75,18 @@ int getCurrentPingt(Usuario_t* usr){
 		return -1;
 	return usr->pingt;
 }
+
+
+int compareUsr(const void* data1, const void* data2){
+	Usuario_t* usr1, * usr2;
+	if(data1 == NULL || data2 == NULL)
+		return -1;
+	
+	usr1= (Usuario_t*) data1;
+	usr2= (Usuario_t*) data2;
+
+	if (usr1->id == usr2->id)
+		return 1;
+	else
+		return 0;
+}
