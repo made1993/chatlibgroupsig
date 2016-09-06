@@ -13,10 +13,18 @@ int command(char* str){
 		return MSG;
 		
 		case CDISCONNECT:
-		return NICK;
+		return DISCONNECT;
 		
 		case CPING:
-		return NICK;
+		return PING;
+
+
+		case CPONG:
+		return PONG;
+
+		case default:
+			return -1;
+		break
 		
 	}
 

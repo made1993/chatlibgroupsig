@@ -1,10 +1,16 @@
-#include <ncurses.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-WINDOW *create_newwin(int height, int width, int starty, int startx)
-{	WINDOW *local_win;
+#include "../include/clientui.h"
+
+
+int pos = 0, row, col, max;
+
+WINDOW* win1, * win2, * win3, * win4; 
+
+void getWIndowSize(){
+	getmaxyx(stdscr,row,col);
+	max = row - 8;
+}
+
+WINDOW *createNewWin(int height, int width, int starty, int startx){	WINDOW *local_win;
 
 	local_win = newwin(height, width, starty, startx);
 	box(local_win, 0 , 0);		/* 0, 0 gives default characters 
@@ -14,8 +20,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
 
 	return local_win;
 }
-WINDOW *create_newwin_hidden(int height, int width, int starty, int startx)
-{	WINDOW *local_win;
+WINDOW *createNewWinHidden(int height, int width, int starty, int startx){	WINDOW *local_win;
 
 	local_win = newwin(height, width, starty, startx);
 	box(local_win, 0 , 0);		/* 0, 0 gives default characters 
@@ -27,8 +32,7 @@ WINDOW *create_newwin_hidden(int height, int width, int starty, int startx)
 	return local_win;
 }
 
-void destroy_win(WINDOW *local_win)
-{	
+void destroyWin(WINDOW *local_win){	
 	/* box(local_win, ' ', ' '); : This won't produce the desired
 	 * result of erasing the window. It will leave it's four corners 
 	 * and so an ugly remnant of window. 
@@ -48,7 +52,44 @@ void destroy_win(WINDOW *local_win)
 	wrefresh(local_win);
 	delwin(local_win);
 }
-int main(int argc, char** argv){
+
+
+void printMsg(char* str){
+		sprintf(str, "%s\n", str);
+		mvwaddstr(win3, pos, 0, str);
+		wrefresh(win3);
+		pos++;
+		pos += (strlen(str)-1)/(col -2);
+		pos= pos%max;
+}
+char* scanMsg(){
+	char* str;
+	str = malloc(sizeof(char) * 8000);
+	mvwgetstr(win4, 0, 0, str);
+
+	destroyWin(win4);
+	win4 = createNewWinHidden(4, col -2 , row - 5, 1);
+	return str;
+}
+
+void createClientUI(){
+	initscr();
+	getWIndowSize();
+	win1 = createNewWin(row - 6, col, 0, 0);
+	win2 = createNewWin(6, col, row - 6, 0);
+	win3 = createNewWinHidden(row - 8, col - 2, 1, 1);
+	win4 = createNewWinHidden(4, col -2 , row - 5, 1);
+}
+
+void destroyClientUI(){
+	destroyWin(win1);
+	destroyWin(win2);
+	destroyWin(win3);
+	destroyWin(win4);
+	endwin();
+}
+
+/*int main(int argc, char** argv){
 	int row, col;
 	WINDOW* win1, * win2, * win3, * win4;
 	int pos = 0, max;
@@ -81,4 +122,4 @@ int main(int argc, char** argv){
 	destroy_win(win4);
 	endwin();
 	return 0;
-}
+}*/
