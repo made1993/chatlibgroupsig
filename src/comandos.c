@@ -11,5 +11,5 @@ int comando(char* msg){
 		return PING;
 	else if(strncmp(msg, CPONG, strlen(CPONG))==0)
 		return PONG;
-	return -1;
+	return MSG2;
 }

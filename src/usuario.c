@@ -10,7 +10,8 @@ Usuario_t* crearUsuario(int* socket){
 	usr = malloc(sizeof(Usuario_t));
 	usr->id = nUsr++;
 	usr->nick = malloc(7);
-	usr->socket = socket;
+	usr->socket = malloc(sizeof(int));
+	*usr->socket = *socket;
 	return usr;
 }
 

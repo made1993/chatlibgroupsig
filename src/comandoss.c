@@ -43,8 +43,10 @@ int sendMsg(Usuario_t* usr, char* msg){
 		return -1;
 	if(nick == NULL || strlen(nick) > 7 || msg == NULL)
 		return -1;
-	buff = malloc(8+ strlen(nick)+strlen(msg));
-	buff= strcat(CMSG, " ");
+	buff = malloc(10 + strlen(nick) + strlen(msg));
+
+	buff= strcat(buff, CMSG);
+	buff= strcat(buff, " ");
 	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
@@ -67,6 +69,15 @@ int recvNick(Usuario_t* usr, char* msg){
 	return 0;
 
 }
+int recvMsg(char * str){
+
+	return 0;
+}
+
+int recvDisconnect(Usuario_t* usr){
+
+	return 0;
+}
 
 int recvPing(Usuario_t* usr){
 	if(usr == NULL || usr->socket == NULL)
@@ -83,6 +94,17 @@ int recvPong(Usuario_t* usr){
 
 
 int broadcastMsg(char * msg){
+	Node* nd = NULL;
+	Usuario_t* usr = NULL;
+	if(listaUsuarios == NULL || msg == NULL)
+		return -1;
+	nd = listaUsuarios->first;
+	while (nd != NULL){
+		usr = (Usuario_t*) nd->data;
+		escribir(*(usr->socket), msg);
+		nd= nd->next;
+	}
+
 
 	return 0;
 }

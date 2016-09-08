@@ -4,17 +4,21 @@
 #include "usuario.h"
 #include "conexion.h"
 #include "comandos.h"
+#include "clientui.h"
 
+extern char* nick;
+
+int sendNick(int socket, char* nick);
+int sendMsg(int socket, char* str);
+int sendDisconnect(int socket);
 int sendPing(int socket);
 int sendPong(int socket);
-int sendNick(int socket, char* nick);
-int sendDisconnect(int socket);
 
 
-int recvNick(int socket, char* nick);
-int recvMsg(int socket, char* nick);
+int recvNick();
+int recvMsg(char* nick);
 int recvDisconnect(int socket);
 int recvPing(int socket);
-int recvPong(int socket);
+int recvPong();
 
 #endif

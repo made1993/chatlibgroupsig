@@ -15,5 +15,6 @@ void destroyWin(WINDOW *win);
 
 void printMsg(char* str);
 char* scanMsg();
-
+void createClientUI();
+void destroyClientUI();
 #endif

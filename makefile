@@ -1,14 +1,14 @@
 
 FLAGS= -Wall
 
-all: obj/usuario.o obj/conexion.o obj/comandosu.o obj/comandoss.o obj/comandos.o obj/linkedList.o
+all: obj/usuario.o obj/conexion.o objC/comandosu.o objS/comandoss.o obj/comandos.o obj/linkedList.o
 
 
-server: obj/usuario.o obj/conexion.o obj/comandoss.o obj/comandos.o obj/linkedList.o src/server.c
-	@gcc $(FLAGS) -o server src/server.c obj/*.o -lpthread
+server: obj/usuario.o obj/conexion.o objS/comandoss.o obj/comandos.o obj/linkedList.o src/server.c
+	@gcc $(FLAGS) -o server src/server.c obj/*.o objS/*.o -lpthread
 
-cliente: obj/usuario.o obj/conexion.o obj/comandosu.o obj/comandos.o obj/linkedList.o obj/clientui.o
-	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o -lnsurces -lpthread 
+cliente: obj/usuario.o obj/conexion.o objC/comandosu.o obj/comandos.o obj/linkedList.o obj/clientui.o
+	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses
 
 obj/usuario.o: src/usuario.c
 	@gcc $(FLAGS) -c -o obj/usuario.o src/usuario.c
@@ -16,11 +16,11 @@ obj/usuario.o: src/usuario.c
 obj/conexion.o: src/conexion.c
 	@gcc $(FLAGS) -c -o obj/conexion.o src/conexion.c
 
-obj/comandosu.o: src/comandosu.c
-	@gcc $(FLAGS) -c -o obj/comandosu.o src/comandosu.c
+objC/comandosu.o: src/comandosu.c
+	@gcc $(FLAGS) -c -o objC/comandosu.o src/comandosu.c
 
-obj/comandoss.o: src/comandoss.c
-	@gcc $(FLAGS) -c -o obj/comandoss.o src/comandoss.c
+objS/comandoss.o: src/comandoss.c
+	@gcc $(FLAGS) -c -o objS/comandoss.o src/comandoss.c
 
 obj/comandos.o: src/comandos.c
 	@gcc $(FLAGS) -c -o obj/comandos.o src/comandos.c
@@ -30,7 +30,7 @@ obj/linkedList.o: src/linkedList.c
 
 
 obj/clientui.o: src/clientui.c
-	@gcc $(FLAGS) -c -o obj/clientui.o src/clientui.c -lnsurces
+	@gcc $(FLAGS) -c -o obj/clientui.o src/clientui.c 
 	
 
 mrProper:

@@ -54,13 +54,14 @@ void destroyWin(WINDOW *local_win){
 }
 
 
-void printMsg(char* str){
-		sprintf(str, "%s\n", str);
-		mvwaddstr(win3, pos, 0, str);
-		wrefresh(win3);
-		pos++;
-		pos += (strlen(str)-1)/(col -2);
-		pos= pos%max;
+void printMsg(char* msg){
+	char* str = malloc(sizeof(char)* (strlen(msg) + 2));
+	sprintf(str, "%s\n", msg);
+	mvwaddstr(win3, pos, 0, str);
+	wrefresh(win3);
+	pos++;
+	pos += (strlen(str)-1)/(col -2);
+	pos= pos%max;
 }
 char* scanMsg(){
 	char* str;
@@ -89,6 +90,15 @@ void destroyClientUI(){
 	endwin();
 }
 
+
+
+/*int main (){
+	createClientUI();
+	printMsg("hola");
+	scanMsg();
+	destroyClientUI();
+
+}
 /*int main(int argc, char** argv){
 	int row, col;
 	WINDOW* win1, * win2, * win3, * win4;
