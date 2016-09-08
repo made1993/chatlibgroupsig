@@ -24,13 +24,15 @@ void* hiloEscritura(void* args){
 	while (1){
 
 		msg = scanMsg();
-		printMsg(msg);
 		switch(comando(msg)){
 			case NICK:
-				sendNick(socket);
+				sendNick(sockfd, msg);
 			break;
 			case MSG:
-				sendMsg(msg);
+				escribir(sockfd ,msg);
+			break;
+			case MSG2:
+				sendMsg(sockfd, msg);
 			break;
 			case DISCONNECT:
 				sendDisconnect(sockfd);
@@ -39,7 +41,7 @@ void* hiloEscritura(void* args){
 				sendPing(sockfd);
 			break;
 			case PONG:
-				sendPong();
+				sendPong(sockfd);
 			break;
 		}
 		free(msg);

@@ -69,7 +69,17 @@ int recvNick(Usuario_t* usr, char* msg){
 	return 0;
 
 }
-int recvMsg(char * str){
+int recvMsg(char * msg){
+	Node* nd = NULL;
+	Usuario_t* usr = NULL;
+	if(listaUsuarios == NULL || msg == NULL)
+		return -1;
+	nd = listaUsuarios->first;
+	while (nd != NULL){
+		usr = (Usuario_t*) nd->data;
+		escribir(*(usr->socket), msg);
+		nd= nd->next;
+	}
 
 	return 0;
 }

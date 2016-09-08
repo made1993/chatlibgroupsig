@@ -99,7 +99,7 @@ int main(){
 
 	abrirListen(socket);
 
-	create_list(compareUsr);
+	listaUsuarios = create_list(compareUsr);
 
 	while(1){
 		socketcli= malloc(sizeof(int));

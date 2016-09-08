@@ -1,6 +1,6 @@
 #include "../include/comandosu.h"
 
-int sendNick(int socket, char* nick){
+int sendNick(int socket, char* msg){
 	char* buff= NULL;
 	int ret = 0;
 	if(nick == NULL)
@@ -20,7 +20,6 @@ int sendMsg(int socket, char* msg){
 	if(nick == NULL || strlen(nick) > 7 || msg == NULL)
 		return -1;
 
-	printMsg("msg");
 	buff = malloc(10 + strlen(nick) + strlen(msg));
 	buff= strcat(buff, CMSG);
 	buff= strcat(buff, " ");
@@ -29,7 +28,6 @@ int sendMsg(int socket, char* msg){
 	buff= strcat(buff, msg);
 	ret = escribir(socket, buff);
 	free(buff);
-	printMsg("mensaje envido");
 	return ret;
 
 }

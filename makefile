@@ -7,7 +7,7 @@ all: obj/usuario.o obj/conexion.o objC/comandosu.o objS/comandoss.o obj/comandos
 server: obj/usuario.o obj/conexion.o objS/comandoss.o obj/comandos.o obj/linkedList.o src/server.c
 	@gcc $(FLAGS) -o server src/server.c obj/*.o objS/*.o -lpthread
 
-cliente: obj/usuario.o obj/conexion.o objC/comandosu.o obj/comandos.o obj/linkedList.o obj/clientui.o
+cliente: obj/usuario.o obj/conexion.o objC/comandosu.o obj/comandos.o obj/linkedList.o objC/clientui.o src/cliente.c
 	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses
 
 obj/usuario.o: src/usuario.c
@@ -29,12 +29,12 @@ obj/linkedList.o: src/linkedList.c
 	@gcc $(FLAGS) -c -o obj/linkedList.o src/linkedList.c 
 
 
-obj/clientui.o: src/clientui.c
-	@gcc $(FLAGS) -c -o obj/clientui.o src/clientui.c 
+objC/clientui.o: src/clientui.c
+	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
 	
 
 mrProper:
-	@rm -f obj/*
+	@rm -f obj/* objS/* objC/* server cliente
 
 
 commit:
