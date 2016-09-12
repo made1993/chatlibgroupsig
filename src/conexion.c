@@ -617,8 +617,8 @@ int recibir(int sockfd,char *buf){
  * Mario Valdemaro Garcia Roque (mariov.garcia@estudiante.uam.es)
  * Roberto Garcia Teodoro (roberto.garciat@estudiante.uam.es)
 */
-int escribir(int sockfd,char *msg){
-	int aux=send(sockfd,msg,strlen(msg),0);
+int escribir(int sockfd, char *msg){
+	int aux = send(sockfd, msg, strlen(msg), 0);
 	if(-1==aux){
 		switch(errno){
 		 	case EACCES: 

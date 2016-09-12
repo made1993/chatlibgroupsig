@@ -109,10 +109,11 @@ int main(int argc , char *argv[]){
 
 			break;
 			case 3:
-				if (strlen(optarg)>7){
-					printf("La longuitud del nick debe ser menor de 7 caracteres\n");
+				if (strlen(optarg) > NICK_MAX_LEN){
+					printf("La longuitud del nick debe ser menor de %d caracteres\n", NICK_MAX_LEN);
+					return 0;
 				}
-				nick = malloc(sizeof(char)*8);
+				nick = malloc(sizeof(char) * NICK_MAX_LEN + 1);
 				strcpy(nick, optarg);
 
 			break;

@@ -17,7 +17,7 @@ int sendMsg(int socket, char* msg){
 	int ret = 0;
 	if(socket <= 0)
 		return -1;
-	if(nick == NULL || strlen(nick) > 7 || msg == NULL)
+	if(nick == NULL || strlen(nick) > NICK_MAX_LEN || msg == NULL)
 		return -1;
 
 	buff = malloc(10 + strlen(nick) + strlen(msg));
@@ -55,6 +55,9 @@ int recvMsg(char* msg){
 	char* pch = NULL;
 	char* str= NULL;
 	int nlen = 0;
+	FILE* f;
+	f = fopen("trash.txt", "a");
+	fprintf(f, "%s\n", msg);
 	msg += strlen(CNICK);
 	pch = strchr(msg, ' ');
 	nlen = pch - msg;
@@ -71,6 +74,7 @@ int recvMsg(char* msg){
 	free(str);
 	free(nick);
 	free(content);
+	fclose(f);
 	return 0;
 }
 

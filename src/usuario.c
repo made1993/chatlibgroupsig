@@ -9,7 +9,7 @@ Usuario_t* crearUsuario(int* socket){
 		return NULL;
 	usr = malloc(sizeof(Usuario_t));
 	usr->id = nUsr++;
-	usr->nick = malloc(7);
+	usr->nick = malloc(NICK_MAX_LEN + 1);
 	usr->socket = malloc(sizeof(int));
 	*usr->socket = *socket;
 	return usr;
@@ -36,7 +36,7 @@ int setNick(Usuario_t* usr ,char* nick){
 	
 	len = strlen(nick);
 	
-	if (len > 7 || len ==0)
+	if (len > NICK_MAX_LEN || len ==0)
 		return 1;
 
 	strcpy(usr->nick, nick);

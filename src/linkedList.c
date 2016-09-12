@@ -1,6 +1,6 @@
 #include <stdbool.h>
 
-#include "../includes/linkedList.h"
+#include "../include/linkedList.h"
 
 LinkedList * create_list(comparator c) {
 

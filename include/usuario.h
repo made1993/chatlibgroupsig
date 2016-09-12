@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 
+#define NICK_MAX_LEN 8
 
 /*Por ahora esto, pero es posible que haya que añadir cosas de claves*/
 typedef struct USUARIO

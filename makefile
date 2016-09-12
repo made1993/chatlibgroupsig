@@ -1,8 +1,7 @@
 
-FLAGS= -Wall
+FLAGS= -Wall -std=gnu99 -pedantic -O3
 
-all: obj/usuario.o obj/conexion.o objC/comandosu.o objS/comandoss.o obj/comandos.o obj/linkedList.o
-
+all: server cliente
 
 server: obj/usuario.o obj/conexion.o objS/comandoss.o obj/comandos.o obj/linkedList.o src/server.c
 	@gcc $(FLAGS) -o server src/server.c obj/*.o objS/*.o -lpthread
