@@ -11,22 +11,40 @@
 #include <sys/types.h>
 #include <pthread.h>
 #include <getopt.h>
-#include "../include/conexion.h"
- 
+#include "../include/comandosu.h"
+#include "../include/clientui.h" 
 
 int sockfd = -1;
 pthread_t h1, h2;
+char* nick;
 void* hiloEscritura(void* args){
-	char* msg= malloc(8096);
+	char* msg = NULL;
 	if(sockfd ==-1)
 		return NULL;
 	while (1){
 
-	scanf("%s", msg);
-	if(strcmp("/disconnect",msg) == 0)
-		break;
-	escribir(sockfd, msg);
-
+		msg = scanMsg();
+		switch(comando(msg)){
+			case NICK:
+				sendNick(sockfd, msg);
+			break;
+			case MSG:
+				escribir(sockfd ,msg);
+			break;
+			case MSG2:
+				sendMsg(sockfd, msg);
+			break;
+			case DISCONNECT:
+				sendDisconnect(sockfd);
+			break;
+			case PING:
+				sendPing(sockfd);
+			break;
+			case PONG:
+				sendPong(sockfd);
+			break;
+		}
+		free(msg);
 	}
 	free(msg);
 	return NULL;
@@ -39,23 +57,37 @@ void* hiloLectura(void* args){
 		return NULL;
 	while(1){
 		recibir(sockfd, msg);
-		printf("%s\n", msg);
+		switch(comando(msg)){
+			case NICK:
+				recvNick();
+			break;
+			case MSG:
+				recvMsg(msg);
+			break;
+			case DISCONNECT:
+				recvDisconnect(sockfd);
+			break;
+			case PING:
+				recvPing(sockfd);
+			break;
+			case PONG:
+				recvPong();
+			break;
+		}
 	}
 	return NULL;
 }
 
 int identificacion(char* nick){
-	
+	return sendNick(sockfd, nick);
 }
 
 int main(int argc , char *argv[]){
-	char* msg= malloc(8096);
 	struct addrinfo hints, *res;
 	char opt;
 	int long_index=0;
 	char * ip = NULL;
 	char * port = NULL;
-	char * nick = NULL;
 	static struct option options[] = {
         {"ip",required_argument,0, 1},
         {"port",required_argument,0, 2},
@@ -108,28 +140,30 @@ int main(int argc , char *argv[]){
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
+	/*Creacion de la UI*/
+	createClientUI();
+
 	/*Comenzamos la conexion TCP*/
-	printf("se obtiene informacion\n");
 	if(0!=getaddrinfo(ip, port, &hints, &res)){
 		printf("No se pudo conectar con el servidor\n");
 		return 0;
 	}
-	printf("socket\n");
 	sockfd=abrirSocketTCP();
 	if(sockfd==-1){
 		return 0;
 	}
-	printf("connect\n");
 	if(-1==abrirConnect(sockfd, *(res->ai_addr))){
 		  
 		return 0;
 	}
 
 	/*Conexion chat*/
-	
-	pthread_create(&h1,NULL, hiloLectura, (void *)NULL );
+	identificacion(nick);
 
-	hiloEscritura(NULL);
+	/*Creacion de los hilos*/
+	pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );
+
+	hiloLectura(NULL);
 	
 	return 0;
  

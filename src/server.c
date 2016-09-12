@@ -5,7 +5,6 @@
 #include <pthread.h>
 
 #include "../include/comandoss.h"
-#include "../include/linkedList.h"
 
 pthread_t* hilos;
 
@@ -30,23 +29,25 @@ void* verificarCliente(void* args){
 
 		if(comando(buff)== NICK){
 			recvNick(usr, buff);
+			printf("Se registro %s\n", usr->nick);
+			escribir(*usr->socket, "/MSG server bienvenido");
 			break;
 		}
 
 	}
 	insert_list(listaUsuarios, usr);
-	return NULL;
+	return usr;
 }
 void* lecturaUsuario(void* args){
-	Usuario_t* usr = NULL;
 	char * buff = malloc(8096);
-	usr = (Usuario_t*) args;
+	Usuario_t* usr = verificarCliente(args);
 	while(1){
 
 		if(recibir(*usr->socket, buff) == -1)
 			break;
 		if(strlen(buff) == 0)
 			break;
+		printf("%s\n", buff);
 		switch (comando(buff)){
 			case NICK:
 				recvNick(usr, buff);
@@ -57,7 +58,7 @@ void* lecturaUsuario(void* args){
 			break;
 
 			case DISCONNECT:
-
+				recvDisconnect(usr);
 			break;
 
 			case PING:
@@ -92,16 +93,13 @@ int main(){
 	
 	struct sockaddr_in ip4addr;
 
-	printf("abrirSocketTCP\n");
 	socket = abrirSocketTCP();
 
-	printf("bind\n");
 	abrirBind(socket, 8080);
 
-	printf("Listen\n");
 	abrirListen(socket);
 
-	create_list(compareUsr);
+	listaUsuarios = create_list(compareUsr);
 
 	while(1){
 		socketcli= malloc(sizeof(int));

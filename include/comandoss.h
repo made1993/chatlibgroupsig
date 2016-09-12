@@ -4,7 +4,8 @@
 #include "conexion.h"
 #include "comandos.h"
 #include "usuario.h"
-
+#include "linkedList.h"
+extern LinkedList* listaUsuarios;
 
 /**
 *
@@ -22,7 +23,7 @@ int sendNick(Usuario_t*, char* newNick);
 
 
 int recvNick(Usuario_t*, char* msg);
-int recvMsg(Usuario_t*, char* msg);
+int recvMsg(char* msg);
 int recvDisconnect(Usuario_t*);
 int recvPing(Usuario_t*);
 int recvPong(Usuario_t*);
