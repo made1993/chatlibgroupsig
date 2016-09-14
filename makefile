@@ -1,6 +1,7 @@
 
 FLAGS= -Wall -std=gnu99 -pedantic -O3
 
+SSLLIBS= -lssl -lcrypto
 all: server cliente
 
 server: obj/usuario.o obj/conexion.o objS/comandoss.o obj/comandos.o obj/linkedList.o src/server.c
@@ -30,10 +31,12 @@ obj/linkedList.o: src/linkedList.c
 
 objC/clientui.o: src/clientui.c
 	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
-	
+
+objC/funcionesDH.o: src/funcionesDH.c
+	@gcc $(FLAGS) -o funcionesDH src/funcionesDH.c $(SSLLIBS)
 
 mrProper:
-	@rm -f obj/* objS/* objC/* server cliente
+	@rm -f obj/* objS/* objC/* server cliente funcionesDH
 
 
 commit:
