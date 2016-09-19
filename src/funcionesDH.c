@@ -1,18 +1,17 @@
 #include "../include/funcionesDH.h"
 
 
-DH* generarDH(){
-	DH *ent1;
+DH* generarDH(int keylen){
+	DH *dh;
 	int codes;
-	int secret_size;
 
 	/* Generate the parameters to be used */
-	if(NULL == (ent1 = DH_new())) 
+	if(NULL == (dh = DH_new())) 
 		return NULL;
-	if(1 != DH_generate_parameters_ex(ent1, 2048, DH_GENERATOR_2, NULL)) 
+	if(1 != DH_generate_parameters_ex(dh, keylen, DH_GENERATOR_2, NULL)) 
 		return 0;
 
-	if(1 != DH_check(ent1, &codes)) 
+	if(1 != DH_check(dh, &codes)) 
 		return NULL;
 
 	if(codes != 0)
@@ -24,83 +23,78 @@ DH* generarDH(){
 	}
 
 	/* Generate the public and private key pair */
-	if(1 != DH_generate_key(ent1)) 
+	if(1 != DH_generate_key(dh)) 
 		return NULL;
 
-	return ent1;
+	return dh;
+}
+DH* generarDHparam(unsigned char * key, BIGNUM *pub_key, BIGNUM* g, BIGNUM* p){
+	DH *dh = NULL;
+	int codes;
+	if(NULL == (dh = DH_new())) 
+		return NULL;
+	dh->g = g;
+	dh->p = p;
+	codes=DH_compute_key(key, pub_key, dh);
+	if(codes == -1){
+		DH_free(dh);
+		return NULL;
+	}
+	printf("%d\n", codes);
+	return dh;
 }
 int main(){
-	DH *ent1;
-	DH *ent2;
-	int codes;
+	DH *dh1;
+	DH *dh2;
 	int secret_size;
-
-	/* Generate the parameters to be used */
-	if(NULL == (ent1 = DH_new())) return 0;
-	if(1 != DH_generate_parameters_ex(ent1, 512, DH_GENERATOR_2, NULL)) return 0;
-
-	if(1 != DH_check(ent1, &codes)) return 0;
-	if(codes != 0)
-	{
-	    /* Problems have been found with the generated parameters */
-	    /* Handle these here - we'll just abort for this example */
-	    printf("DH_check failed\n");
-	    abort();
+	int keylen = 512;
+	unsigned char * key = NULL; 
+	dh1 = generarDH(keylen);
+	key = malloc(sizeof(unsigned char) * (keylen + 1));
+	if (dh1 == NULL){
+		printf("ERROR dh1\n");
+		return 1;
 	}
-
-	/* Generate the public and private key pair */
-	if(1 != DH_generate_key(ent1)) return 0;
-
-
-	/* Generate the parameters to be used */
-	if(NULL == (ent2 = DH_new())) return 0;
-	if(1 != DH_generate_parameters_ex(ent2, 512, DH_GENERATOR_2, NULL)) return 0;
-
-	if(1 != DH_check(ent2, &codes)) return 0;
-	if(codes != 0)
-	{
-	    /* Problems have been found with the generated parameters */
-	    /* Handle these here - we'll just abort for this example */
-	    printf("DH_check failed\n");
-	    abort();
+	dh2 = generarDHparam(key, dh1->pub_key, dh1->g, dh1->p);
+	if (dh2 == NULL){
+		printf("ERROR dh2\n");
+		return 1;
 	}
-
-	/* Generate the public and private key pair */
-	if(1 != DH_generate_key(ent2)) return 0;
 
 	/* Send the public key to the peer.
 	 * How this occurs will be specific to your situation (see main text below) */
 
 
 	/* Receive the public key from the peer. In this example we're just hard coding a value */
-	BIGNUM *pubkey = ent2->pub_key;
+	BIGNUM *pubkey = dh2->pub_key;
 
 	/* Compute the shared secret */
 	unsigned char *secret;
-	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(ent1))))) return 0;
+	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(dh1))))) return 0;
 
-	if(0 > (secret_size = DH_compute_key(secret, pubkey, ent1))) return 0;
+	if(0 > (secret_size = DH_compute_key(secret, pubkey, dh1))) return 0;
 
 	/* Do something with the shared secret */
-	/* Note secret_size may be less than DH_size(ent1) */
+	/* Note secret_size may be less than DH_size(dh1) */
 	printf("The shared secret is:\n");
 	BIO_dump_fp(stdout, (const char *) secret, secret_size);
 
 	/* Clean up */
 	OPENSSL_free(secret);
 
-	pubkey = ent1->pub_key;
+	pubkey = dh1->pub_key;
 	/* Compute the shared secret */
-	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(ent2))))) return 0;
+	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(dh2))))) return 0;
 
-	if(0 > (secret_size = DH_compute_key(secret,pubkey, ent2))) return 0;
+	if(0 > (secret_size = DH_compute_key(secret,pubkey, dh2))) return 0;
 
 	/* Do something with the shared secret */
-	/* Note secret_size may be less than DH_size(ent1) */
+	/* Note secret_size may be less than DH_size(dh1) */
 	printf("The shared secret is:\n");
-	BIO_dump_fp(stdout, secret, secret_size);
-	DH_free(ent1);
-	DH_free(ent2);
+	BIO_dump_fp(stdout, (const char*) secret, secret_size);
+	printf("secret size:%d\n", secret_size);
+	DH_free(dh1);
+	DH_free(dh2);
 
 
 
