@@ -1,11 +1,33 @@
 #include "../include/funcionesDH.h"
 
 
-DH* generarDH(int keylen){
-	DH *dh;
-	int codes;
+int DHkey(DH *dh){
+	if(1 != DH_generate_key(dh)) 
+		return 0;
 
-	/* Generate the parameters to be used */
+	return 1;
+}
+
+DH* DHkeyFromParam(BIGNUM* p, BIGNUM* g){
+	DH *dh = NULL;
+
+
+	if(NULL == (dh = DH_new())) 
+		return NULL;
+
+	dh->p = malloc(sizeof(BIGNUM));
+	dh->g = malloc(sizeof(BIGNUM));
+	*dh->p = *p;
+	*dh->g = *g;
+
+	if(1 != DHkey(dh))
+		return NULL;
+	return dh;
+}
+
+DH* DHparam(int keylen){
+	DH *dh = NULL;
+	int codes = 0;
 	if(NULL == (dh = DH_new())) 
 		return NULL;
 	if(1 != DH_generate_parameters_ex(dh, keylen, DH_GENERATOR_2, NULL)) 
@@ -13,53 +35,41 @@ DH* generarDH(int keylen){
 
 	if(1 != DH_check(dh, &codes)) 
 		return NULL;
-
-	if(codes != 0)
-	{
-	    /* Problems have been found with the generated parameters */
-	    /* Handle these here - we'll just abort for this example */
-	    printf("DH_check failed\n");
+	if(codes != 0){
 	    abort();
 	}
-
-	/* Generate the public and private key pair */
-	if(1 != DH_generate_key(dh)) 
-		return NULL;
-
 	return dh;
 }
-DH* generarDHparam(unsigned char * key, BIGNUM *pub_key, BIGNUM* g, BIGNUM* p){
-	DH *dh = NULL;
-	int codes;
-	if(NULL == (dh = DH_new())) 
+
+unsigned char* DHsharedKey(DH* dh, BIGNUM* pubkey){
+	unsigned char *secret;
+	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(dh))))) 
 		return NULL;
-	dh->g = g;
-	dh->p = p;
-	codes=DH_compute_key(key, pub_key, dh);
-	if(codes == -1){
-		DH_free(dh);
+
+	if(0 > DH_compute_key(secret, pubkey, dh)) 
 		return NULL;
-	}
-	printf("%d\n", codes);
-	return dh;
+	return secret;
 }
+
 int main(){
 	DH *dh1;
 	DH *dh2;
-	int secret_size;
 	int keylen = 512;
-	unsigned char * key = NULL; 
-	dh1 = generarDH(keylen);
-	key = malloc(sizeof(unsigned char) * (keylen + 1));
+	unsigned char *secret;
+
+	dh1 = DHparam(keylen);
+	
+	DHkey(dh1);
+
 	if (dh1 == NULL){
-		printf("ERROR dh1\n");
 		return 1;
 	}
-	dh2 = generarDHparam(key, dh1->pub_key, dh1->g, dh1->p);
+	dh2 = DHkeyFromParam(dh1->p, dh1->g);
+	DHkey(dh2);	
 	if (dh2 == NULL){
-		printf("ERROR dh2\n");
 		return 1;
 	}
+
 
 	/* Send the public key to the peer.
 	 * How this occurs will be specific to your situation (see main text below) */
@@ -69,34 +79,30 @@ int main(){
 	BIGNUM *pubkey = dh2->pub_key;
 
 	/* Compute the shared secret */
-	unsigned char *secret;
-	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(dh1))))) return 0;
-
-	if(0 > (secret_size = DH_compute_key(secret, pubkey, dh1))) return 0;
-
+	
+	secret = DHsharedKey(dh1, pubkey);
 	/* Do something with the shared secret */
 	/* Note secret_size may be less than DH_size(dh1) */
 	printf("The shared secret is:\n");
-	BIO_dump_fp(stdout, (const char *) secret, secret_size);
+	BIO_dump_fp(stdout, (const char *) secret, 64);
 
 	/* Clean up */
 	OPENSSL_free(secret);
 
 	pubkey = dh1->pub_key;
 	/* Compute the shared secret */
-	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(dh2))))) return 0;
 
-	if(0 > (secret_size = DH_compute_key(secret,pubkey, dh2))) return 0;
+	secret = DHsharedKey(dh2, pubkey);
 
 	/* Do something with the shared secret */
 	/* Note secret_size may be less than DH_size(dh1) */
 	printf("The shared secret is:\n");
-	BIO_dump_fp(stdout, (const char*) secret, secret_size);
-	printf("secret size:%d\n", secret_size);
+	BIO_dump_fp(stdout, (const char*) secret, 64);
+
 	DH_free(dh1);
 	DH_free(dh2);
+	
 
-
-
+	return 0;
 
 }
