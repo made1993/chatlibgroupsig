@@ -35,8 +35,11 @@ objC/clientui.o: src/clientui.c
 objC/funcionesDH.o: src/funcionesDH.c
 	@gcc $(FLAGS) -o funcionesDH src/funcionesDH.c $(SSLLIBS)
 
+objC/funcionesAES.o: src/funcionesAES.c
+	@gcc $(FLAGS) -o funcionesAES src/funcionesAES.c $(SSLLIBS)
+
 mrProper:
-	@rm -f obj/* objS/* objC/* server cliente funcionesDH
+	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES
 
 
 commit:
