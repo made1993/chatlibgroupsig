@@ -19,21 +19,23 @@ void AES_decrypt(const unsigned char *in, unsigned char *out,
 
 
 int main (int argc, char ** argv){
-	AES_KEY* key;
+	AES_KEY* enc_key,* dec_key;
 	char usr_key[] = "FkQCx$K9A:KWQo'P^/.6*qGRyXkRS";
-	char msg[] = "esto esta cifrado con AES 256 CBC";
+	char msg[] = "hola esto esta cifrado en AES";
 	char out1[8096], out2[8096];
-	key = malloc(sizeof(AES_KEY));
+	enc_key = malloc(sizeof(AES_KEY));
+	dec_key = malloc(sizeof(AES_KEY));
 
-	AES_set_encrypt_key((const unsigned char*) usr_key, 256, key);
+	AES_set_encrypt_key((const unsigned char*) usr_key, 256, enc_key);
+	AES_set_decrypt_key((const unsigned char*) usr_key, 256, dec_key);
 	
 	AES_encrypt((const unsigned char *) msg, (unsigned char *) out1, 
-				key);
-	printf("%s\n", out1);
+				enc_key);
 
 	AES_decrypt((const unsigned char *) out1, (unsigned char *) out2, 
-				key);
-	printf("%s\n", out2);
+				dec_key);
 
+	free(enc_key);
+	free(dec_key);
 	return 0;
 }
