@@ -11,4 +11,6 @@
 #include <stdio.h>
 
 
+#define TEXT_BLOCK 64
+
 #endif
