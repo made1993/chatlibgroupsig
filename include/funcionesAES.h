@@ -13,4 +13,14 @@
 
 #define TEXT_BLOCK 64
 
+
+
+EVP_CIPHER_CTX* create_ctx();
+
+
+void encrypt_cbc256(EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, const unsigned char* text, unsigned char* out);
+
+
+void decrypt_cbc256(EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, const unsigned char* text, unsigned char* out);
+
 #endif

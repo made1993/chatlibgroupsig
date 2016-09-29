@@ -17,29 +17,70 @@ void AES_cbc_encrypt(const unsigned char *in, unsigned char *out,
                      unsigned char *ivec, const int enc);
 */
 
-unsigned char* encrypt_cbc256(unsigned char* key, unsigned char* iv, const unsigned char* text){
+
+EVP_CIPHER_CTX* create_ctx(){
 	EVP_CIPHER_CTX* ctx = NULL;
-	unsigned char* ret = NULL;
-	int blk = 0, i = 0, tmp;
-
-	ctx = (EVP_CIPHER_CTX*) malloc(sizeof(EVP_CIPHER_CTX));
+	ctx = EVP_CIPHER_CTX_new();
 	EVP_CIPHER_CTX_init(ctx);
-	EVP_EncryptInit(ctx, EVP_aes_256_cbc(), key, iv);
-
-	blk = strlen((char*) text) / TEXT_BLOCK;
-	if(strlen((char*) text) % TEXT_BLOCK > 1)
-		blk++;
-	ret = malloc(sizeof(char) * (TEXT_BLOCK * blk));
-	for (; i < blk; i++){
-		EVP_EncryptUpdate(ctx, ret +(TEXT_BLOCK * i), &tmp, text +(TEXT_BLOCK * i), TEXT_BLOCK);
-	}
-
-	EVP_EncryptFinal(ctx, ret +(TEXT_BLOCK *blk), &tmp);
-
-	return ret;
+	
+	return ctx;
 }
 
 
+
+void encrypt_cbc256(EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, const unsigned char* text, unsigned char* out){
+	int blk = 0, i = 0, tmp = 0;
+	
+	EVP_EncryptInit(ctx, EVP_aes_256_cbc(), key, iv);
+	blk = strlen((char*) text) / TEXT_BLOCK;
+	if(strlen((char*) text) % TEXT_BLOCK > 1)
+		blk++;
+	for (; i < blk; i++){
+		EVP_EncryptUpdate(ctx, out +(TEXT_BLOCK * i), &tmp, text +(TEXT_BLOCK * i), TEXT_BLOCK);
+	}
+
+	EVP_EncryptFinal_ex(ctx, out +(TEXT_BLOCK *blk), &tmp);
+	
+	return;
+}
+void decrypt_cbc256(EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, const unsigned char* text, unsigned char* out){
+	int tmp;
+	EVP_DecryptInit(ctx, EVP_aes_256_cbc(), key, iv);
+	EVP_DecryptUpdate(ctx, out, &tmp, text, 64);
+	EVP_DecryptFinal_ex(ctx, out, &tmp);
+	
+	return;
+
+}
+
+int main (int argc, char ** argv){
+	int i = 0;
+	unsigned char usr_key[] = "FkQCx$K9A:KWQo'P^/.6*qGRyXkRS";
+	unsigned char msg[] = "hola esto esta cifrado en AES";
+	unsigned char ivec[] = "dontusethisinput";
+	unsigned char* cipher;
+	unsigned char* plain;
+	EVP_CIPHER_CTX* ctx;
+	ctx = create_ctx();
+	
+	cipher = malloc(sizeof(unsigned char) * 8096);
+	plain = malloc(sizeof(unsigned char) * 8096);
+
+
+
+	for( i = 0; i< 100; i++){
+		encrypt_cbc256(ctx, usr_key, ivec, msg, cipher);
+		EVP_CIPHER_CTX_cleanup(ctx);
+		decrypt_cbc256(ctx, usr_key, ivec, cipher, plain);
+		EVP_CIPHER_CTX_cleanup(ctx);
+	}
+	EVP_CIPHER_CTX_free(ctx);
+	free(cipher);
+	free(plain);
+	return 1;
+
+}
+/*
 int main (int argc, char ** argv){
 	unsigned char usr_key[] = "FkQCx$K9A:KWQo'P^/.6*qGRyXkRS";
 	unsigned char msg[] = "hola esto esta cifrado en AES";
@@ -48,12 +89,9 @@ int main (int argc, char ** argv){
 	int out1n = 0, tmp, out2n = 0;
 	EVP_CIPHER_CTX* x = (EVP_CIPHER_CTX*) malloc(sizeof(EVP_CIPHER_CTX));
 	EVP_CIPHER_CTX_init(x);
-//	enc_key = malloc(sizeof(AES_KEY));
-//	dec_key = malloc(sizeof(AES_KEY));
 
-/*	AES_set_encrypt_key((const unsigned char*) usr_key, 256, enc_key);
-	AES_set_decrypt_key((const unsigned char*) usr_key, 256, dec_key);
-*/
+	
+
 	EVP_EncryptInit(x, EVP_aes_256_cbc(), usr_key, ivec);
 
 
@@ -81,18 +119,5 @@ int main (int argc, char ** argv){
 
 	printf("%d\t %s\n", out2n, out2);
 	
-	/*AES_encrypt((const unsigned char *) msg, (unsigned char *) out1, 
-				enc_key);
-
-	AES_decrypt((const unsigned char *) out1, (unsigned char *) out2, 
-				dec_key);
-	*/
-
-	/*for(i = 0; i<strlen(msg); i++){
-	}*/
-	
-
-//	free(enc_key);
-//	free(dec_key);
 	return 0;
-}
+}*/
