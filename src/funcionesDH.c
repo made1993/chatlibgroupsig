@@ -54,7 +54,7 @@ unsigned char* DHsharedKey(DH* dh, BIGNUM* pubkey){
 int main(){
 	DH *dh1;
 	DH *dh2;
-	int keylen = 512;
+	int keylen = 2048;
 	unsigned char *secret;
 
 	dh1 = DHparam(keylen);
@@ -84,7 +84,7 @@ int main(){
 	/* Do something with the shared secret */
 	/* Note secret_size may be less than DH_size(dh1) */
 	printf("The shared secret is:\n");
-	BIO_dump_fp(stdout, (const char *) secret, 64);
+	BIO_dump_fp(stdout, (const char *) secret, 256);
 
 	/* Clean up */
 	OPENSSL_free(secret);
@@ -97,7 +97,7 @@ int main(){
 	/* Do something with the shared secret */
 	/* Note secret_size may be less than DH_size(dh1) */
 	printf("The shared secret is:\n");
-	BIO_dump_fp(stdout, (const char*) secret, 64);
+	BIO_dump_fp(stdout, (const char*) secret, 256);
 
 	DH_free(dh1);
 	DH_free(dh2);

@@ -32,10 +32,10 @@ obj/linkedList.o: src/linkedList.c
 objC/clientui.o: src/clientui.c
 	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
 
-objC/funcionesDH.o: src/funcionesDH.c
+obj/funcionesDH.o: src/funcionesDH.c
 	@gcc $(FLAGS) -o funcionesDH src/funcionesDH.c $(SSLLIBS)
 
-objC/funcionesAES.o: src/funcionesAES.c
+obj/funcionesAES.o: src/funcionesAES.c
 	@gcc $(FLAGS) -o funcionesAES src/funcionesAES.c $(SSLLIBS)
 
 mrProper:

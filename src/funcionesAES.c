@@ -73,6 +73,7 @@ int main (int argc, char ** argv){
 		EVP_CIPHER_CTX_cleanup(ctx);
 		decrypt_cbc256(ctx, usr_key, ivec, cipher, plain);
 		EVP_CIPHER_CTX_cleanup(ctx);
+		printf("%s\n\n%s\n\n", (char*) cipher, (char*) plain);
 	}
 	EVP_CIPHER_CTX_free(ctx);
 	free(cipher);
