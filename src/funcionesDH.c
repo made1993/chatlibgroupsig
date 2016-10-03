@@ -1,108 +1,142 @@
+
 #include "../include/funcionesDH.h"
 
 
-int DHkey(DH *dh){
-	if(1 != DH_generate_key(dh)) 
+int getParamsIniDH(EVP_PKEY** params){
+	if(1 != EVP_PKEY_set1_DH(*params,DH_get_2048_256())) return 0;
+	return 1;
+}
+
+int genNewParamsIniDH(EVP_PKEY** params, EVP_PKEY_CTX** pctx){
+	*pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DH, NULL);
+	if(!*pctx){
 		return 0;
+	}
+
+	if(1 != EVP_PKEY_paramgen_init(*pctx)){
+		EVP_PKEY_CTX_free(*pctx);
+		return 0;
+	}
+
+	if(1 != EVP_PKEY_CTX_set_dh_paramgen_prime_len(*pctx, 2048)){
+		EVP_PKEY_CTX_free(*pctx);
+		return 0;
+	}
+
+	if(1 != EVP_PKEY_paramgen(*pctx, params)){
+		EVP_PKEY_CTX_free(*pctx);
+		return 0;
+	}
 
 	return 1;
 }
 
-DH* DHkeyFromParam(BIGNUM* p, BIGNUM* g){
-	DH *dh = NULL;
-
-
-	if(NULL == (dh = DH_new())) 
-		return NULL;
-
-	dh->p = malloc(sizeof(BIGNUM));
-	dh->g = malloc(sizeof(BIGNUM));
-	*dh->p = *p;
-	*dh->g = *g;
-
-	if(1 != DHkey(dh))
-		return NULL;
-	return dh;
-}
-
-DH* DHparam(int keylen){
-	DH *dh = NULL;
-	int codes = 0;
-	if(NULL == (dh = DH_new())) 
-		return NULL;
-	if(1 != DH_generate_parameters_ex(dh, keylen, DH_GENERATOR_2, NULL)) 
+int genKeyFromParamsDH(EVP_PKEY_CTX** kctx, EVP_PKEY** dhkey, EVP_PKEY* params){
+	
+	/* Create context*/
+	if(!(*kctx = EVP_PKEY_CTX_new(params, NULL))){
 		return 0;
-
-	if(1 != DH_check(dh, &codes)) 
-		return NULL;
-	if(codes != 0){
-	    abort();
-	}
-	return dh;
-}
-
-unsigned char* DHsharedKey(DH* dh, BIGNUM* pubkey){
-	unsigned char *secret;
-	if(NULL == (secret = OPENSSL_malloc(sizeof(unsigned char) * (DH_size(dh))))) 
-		return NULL;
-
-	if(0 > DH_compute_key(secret, pubkey, dh)) 
-		return NULL;
-	return secret;
-}
-
-int main(){
-	DH *dh1;
-	DH *dh2;
-	int keylen = 2048;
-	unsigned char *secret;
-
-	dh1 = DHparam(keylen);
-	
-	DHkey(dh1);
-
-	if (dh1 == NULL){
-		return 1;
-	}
-	dh2 = DHkeyFromParam(dh1->p, dh1->g);
-	DHkey(dh2);	
-	if (dh2 == NULL){
-		return 1;
 	}
 
-
-	/* Send the public key to the peer.
-	 * How this occurs will be specific to your situation (see main text below) */
-
-
-	/* Receive the public key from the peer. In this example we're just hard coding a value */
-	BIGNUM *pubkey = dh2->pub_key;
-
-	/* Compute the shared secret */
+	/* Generate a new key */
+	if(1 != EVP_PKEY_keygen_init(*kctx)){
+		EVP_PKEY_CTX_free(*kctx);
+		return 0;
+	}
 	
-	secret = DHsharedKey(dh1, pubkey);
-	/* Do something with the shared secret */
-	/* Note secret_size may be less than DH_size(dh1) */
-	printf("The shared secret is:\n");
-	BIO_dump_fp(stdout, (const char *) secret, 256);
+	if(1 != EVP_PKEY_keygen(*kctx, dhkey)){
+		EVP_PKEY_CTX_free(*kctx);
+		return 0;
+	}
 
-	/* Clean up */
-	OPENSSL_free(secret);
-
-	pubkey = dh1->pub_key;
-	/* Compute the shared secret */
-
-	secret = DHsharedKey(dh2, pubkey);
-
-	/* Do something with the shared secret */
-	/* Note secret_size may be less than DH_size(dh1) */
-	printf("The shared secret is:\n");
-	BIO_dump_fp(stdout, (const char*) secret, 256);
-
-	DH_free(dh1);
-	DH_free(dh2);
-	
-
-	return 0;
-
+	return 1;
 }
+unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
+	unsigned char* skey = NULL;
+	EVP_PKEY_CTX* ctx = NULL;
+	size_t skeylen;
+	ctx = EVP_PKEY_CTX_new(privkey, NULL);
+
+	if (!ctx){
+		return NULL;
+	}
+	
+	if(EVP_PKEY_derive_init(ctx) <= 0){
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+	
+	if (EVP_PKEY_derive_set_peer(ctx, peerkey) <= 0){
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+
+	/* Determine buffer length */
+	if (EVP_PKEY_derive(ctx, NULL, &skeylen) <= 0){
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+
+	skey = OPENSSL_malloc(skeylen);
+
+	if (!skey){
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+	if (EVP_PKEY_derive(ctx, skey, &skeylen) <= 0){
+		OPENSSL_free(skey);
+		EVP_PKEY_CTX_free(ctx);
+		return NULL;
+	}
+	return skey;
+}
+
+int main(int argc, char** argv){
+	EVP_PKEY* params,* dhkey1,* dhkey2;
+	EVP_PKEY_CTX* kctx1,* kctx2;
+	unsigned char *skey;
+
+	/* Use built-in parameters */
+	if(NULL == (params = EVP_PKEY_new())) return 0;
+	if(NULL == (dhkey1 = EVP_PKEY_new())) return 0;
+	if(NULL == (dhkey2 = EVP_PKEY_new())) return 0;
+
+	/*Utiliza parametros ya inicializodos*/
+	getParamsIniDH(&params);
+	
+	/*Genera parametros nuevos*/
+	//genNewParamsIniDH(&params, &pctx);
+	
+	/*generate key 1*/
+	genKeyFromParamsDH(&kctx1,&dhkey1, params);
+
+	/*generate key 2*/
+	genKeyFromParamsDH(&kctx2,&dhkey2, dhkey1);
+
+
+	
+	
+	skey = deriveSharedSecretDH(dhkey1, dhkey2);
+
+	BIO_dump_fp(stdout, (const char*) skey, 256);
+	printf("\n");
+
+	OPENSSL_free(skey);
+
+	skey = deriveSharedSecretDH(dhkey2, dhkey1);	
+
+	BIO_dump_fp(stdout, (const char*) skey, 256);
+
+	OPENSSL_free(skey);
+
+	EVP_PKEY_CTX_free(kctx1);
+	EVP_PKEY_CTX_free(kctx2);
+	EVP_PKEY_free(dhkey1);
+	EVP_PKEY_free(dhkey2);
+	EVP_PKEY_free(params);
+
+
+	
+}
+
+

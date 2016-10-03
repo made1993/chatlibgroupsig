@@ -7,44 +7,39 @@
 #include <openssl/dh.h>
 #include <openssl/evp.h>
 #include <openssl/bio.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/dh.h>
+#include <openssl/evp.h>
+#include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/bn.h>
 #include <stdio.h>
 
-/**
-*	Genera la clave publica y privada que se usara
-*	una vez inicializados los parametros de dh.
-*	
-* 
-**/
-int  DHkey(DH *dh);
+/*
+**	Usa  ua g y una p dada por generada con
+**	anterioridad por openssl que se usaran en el 
+**	protocolo de intercambio de clave.
+*/
+int getParamsIniDH(EVP_PKEY** params);
 
-/**
-*	Genera la clave publica y privada de dh con los
-*	valores compartidos g y p.
-*
-* 	TODO:
-*	revisar si existe una funcion o algun procedimiento
-* 	que haga las cosas mas limpias de lo que estan.
-*	El problema es que hay una ñapa curiosa para usar
-*	los p y g que pasan como argumentos. 	
-**/
-DH* DHkeyFromParam(BIGNUM* p, BIGNUM* g);
+/*
+**	Genere una g y una p que se usaran en el 
+**	protocolo de intercambio de clave.
+*/
+int genNewParamsIniDH(EVP_PKEY** params, EVP_PKEY_CTX** pctx);
 
-/**
-*	Genera los parametros de dh dada la longuitud
-*	de la clave que se usara.
-*
-* 
-**/
+/*
+**	Dados unos parametros genera una clave Diffie
+**	Hellman.
+**
+*/
+int genKeyFromParamsDH(EVP_PKEY_CTX** kctx, EVP_PKEY** dhkey, EVP_PKEY* params);
 
-DH* DHparam(int keylen);
-/**
-*	Genera la clave compartida que se va a usar.
-*
-* 
-**/
+/*
+**	Genera el secreto compartido de 2 claves dadas.
+*/
+unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey);
 
-unsigned char* DHsharedKey(DH* dh, BIGNUM* pubkey);
 
 #endif
