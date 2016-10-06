@@ -39,8 +39,8 @@ obj/funcionesAES.o: src/funcionesAES.c
 	@gcc $(FLAGS) -o funcionesAES src/funcionesAES.c $(SSLLIBS)
 
 
-obj/funcionesRSA.o: src/funcionesRSA.c
-	@gcc $(FLAGS) -o funcionesRSA src/funcionesRSA.c $(SSLLIBS)
+obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
+	@gcc $(FLAGS) -o funcionesRSA src/funcionesRSA.c obj/conexion.o $(SSLLIBS)
 
 mrProper:
 	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES

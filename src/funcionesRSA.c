@@ -93,7 +93,6 @@ int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* 
 	
 	EVP_MD_CTX* ctx = NULL;
 	const EVP_MD* md = NULL;
-	int i = 0;
 
 	if(!msg || !sig || !slen || !key) {
         assert(0);
@@ -141,19 +140,19 @@ int reciveRSASign(EVP_PKEY* privKey, const unsigned char* buff){
 
 
 int sendRSASign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg){
-	const unsigned char* sig = NULL;
+	unsigned char* buff = NULL;
 	size_t slen = 0;
 	if(privKey == NULL){
 		return 0;
 	}
 
-	if (1 != signMsgRSA(privKey, msg, &sig, &slen)){
+	if (1 != signMsgRSA(privKey, msg, &buff, &slen)){
 		return 0;
  	}
+ 	buff = realloc(buff ,SHA256_SIGLEN + strlen((char*) msg));
+	escribir(sockfd, (char*) buff);
 
- 	escribir();
-
-
+	return 1;
 }
 
 int main (){

@@ -14,7 +14,7 @@
 #include "conexion.h"
 
 
-#define SHA256_SIGLEN 256;
+#define SHA256_SIGLEN 256
 
 const char hn[] = "SHA256";
 
