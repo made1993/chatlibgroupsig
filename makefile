@@ -38,6 +38,10 @@ obj/funcionesDH.o: src/funcionesDH.c
 obj/funcionesAES.o: src/funcionesAES.c
 	@gcc $(FLAGS) -o funcionesAES src/funcionesAES.c $(SSLLIBS)
 
+
+obj/funcionesRSA.o: src/funcionesRSA.c
+	@gcc $(FLAGS) -o funcionesRSA src/funcionesRSA.c $(SSLLIBS)
+
 mrProper:
 	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES
 
