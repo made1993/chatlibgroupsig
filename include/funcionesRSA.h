@@ -29,6 +29,7 @@ const char hn[] = "SHA256";
 *	
 **/
 int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey);
+
 /**
 *	
 *	
@@ -39,8 +40,8 @@ int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey);
 *	
 *	
 **/
-
 int signMsgRSA(EVP_PKEY* key, const unsigned char* msg, unsigned char** sig, size_t* slen);
+
 /**
 *	
 *	
@@ -51,9 +52,55 @@ int signMsgRSA(EVP_PKEY* key, const unsigned char* msg, unsigned char** sig, siz
 *	
 *	
 **/
-
 int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* msg, size_t slen);
 
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, unsigned char** msg);
 
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msglen);
+
+
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int reciveRSAkey(int sockfd, EVP_PKEY* pubKey);
+
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int sendRSAKEY(int sockfd, EVP_PKEY* privKey);
 
 #endif

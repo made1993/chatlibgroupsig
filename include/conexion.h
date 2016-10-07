@@ -20,6 +20,10 @@
 #include <netinet/in.h>
 #include <inttypes.h>
 #include <math.h>
+
+#define MAX_MSG_LEN 8096
+#define LAST_MSG 0
+#define MORE_MSG 1
 typedef struct argumentos{
 	char direccion[20];
 	char strPuerto[20];

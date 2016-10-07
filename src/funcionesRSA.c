@@ -134,25 +134,87 @@ int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* 
 	return EVP_DigestVerifyFinal(ctx, sig, slen);
 }
 
-int reciveRSASign(EVP_PKEY* privKey, const unsigned char* buff){
+int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, unsigned char** msg){
+	unsigned char* sig = NULL, buff[8096];
+	int size, moreMsg;
+
+	/*SE OBTIENE LA FIRMA*/
+	size = recibir(sockfd, (char*) buff);
+	sig = malloc(sizeof(char) * 256);
+	size += (1 + SHA256_SIGLEN);
+	memcpy(sig, buff, 256);
+	
+	/*SE OBTIENE EL MENSAJE*/
+	moreMsg = buff[256];
+	msg = malloc(sizeof(unsigned char) * (size));
+	memcpy(msg, &buff[SHA256_SIGLEN + 1], size);
+
+	/*SE OBTIENEN SUCESICVAS PARTES DEL MENSAJE SI ES NECESARIO*/
+	while(moreMsg){	
+		size += recibir(sockfd, (char*) buff);
+		size--;
+		msg = realloc(msg, sizeof(unsigned char) * size);
+		moreMsg = buff[0];
+	}
+	/*SE COMPRUEB LA FIRMA*/
+	return verifySignRSA(pubKey, (const unsigned char*)sig, 
+						(const unsigned char*)msg, SHA256_SIGLEN);
 
 }
 
 
-int sendRSASign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg){
+int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msglen){
 	unsigned char* buff = NULL;
 	size_t slen = 0;
-	if(privKey == NULL){
+	int ret = 0;
+	/*CONTROL DE ERRORES*/
+	if(privKey == NULL || msg == NULL || msglen <= 0){
 		return 0;
 	}
 
+	/*SE FIRMA EL MENSAJE*/
 	if (1 != signMsgRSA(privKey, msg, &buff, &slen)){
 		return 0;
- 	}
- 	buff = realloc(buff ,SHA256_SIGLEN + strlen((char*) msg));
-	escribir(sockfd, (char*) buff);
+	}
 
-	return 1;
+	/*SE CPMPRUEBA DE QUE TAMÑO ES EL MENSAJE Y SE ENVIA*/
+
+	if(msglen > (MAX_MSG_LEN -1 - SHA256_SIGLEN)){
+		buff = realloc(buff, MAX_MSG_LEN);
+		buff[SHA256_SIGLEN] = MORE_MSG;
+		memcpy (&buff[SHA256_SIGLEN + 1], msg, MAX_MSG_LEN -1 - SHA256_SIGLEN);
+		msglen -= (MAX_MSG_LEN -1 - SHA256_SIGLEN);
+	}
+	else{
+		buff = realloc(buff, SHA256_SIGLEN + msglen + 1);
+		buff[SHA256_SIGLEN] = LAST_MSG;
+		memcpy (&buff[SHA256_SIGLEN + 1], msg, msglen);
+		msglen = 0;
+	}
+	
+	ret = escribir(sockfd, (char*) buff);
+	ret -= (SHA256_SIGLEN + 1);
+
+	/*SI EL MENSAJE ES DEMASIADO LARGO SE ENVIA EL RESTO DE LAS PARTES*/
+	while(msglen != 0){	
+
+		if(msglen > (MAX_MSG_LEN -1 - SHA256_SIGLEN)){
+			buff[0] = MORE_MSG;
+			memcpy (&buff[1], &msg[ret], MAX_MSG_LEN -1);
+			msglen -= (MAX_MSG_LEN -1);
+		}
+		else{
+			buff = realloc(buff, msglen + 1);
+			buff[1] = LAST_MSG;
+			memcpy (&buff[+ 1], &msg[ret], msglen);
+			msglen = 0;
+		}
+		ret += escribir(sockfd, (char*) buff);
+		ret--;
+ 	}	
+ 	if (msglen == ret)
+		return 1;
+	return 0;	
 }
 
 int main (){
