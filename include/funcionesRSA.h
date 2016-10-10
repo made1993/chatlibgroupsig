@@ -16,7 +16,6 @@
 
 #define SHA256_SIGLEN 256
 
-const char hn[] = "SHA256";
 
 /**
 *	
@@ -89,7 +88,7 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 *	
 *	
 **/
-int reciveRSAkey(int sockfd, EVP_PKEY* pubKey);
+int reciveRSAkey(int sockfd, EVP_PKEY** pubKey);
 
 /**
 *	
@@ -101,6 +100,6 @@ int reciveRSAkey(int sockfd, EVP_PKEY* pubKey);
 *	
 *	
 **/
-int sendRSAKEY(int sockfd, EVP_PKEY* privKey);
+int sendRSAkey(int sockfd, EVP_PKEY* privKey);
 
 #endif

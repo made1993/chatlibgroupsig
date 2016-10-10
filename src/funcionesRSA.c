@@ -1,5 +1,9 @@
 #include "../include/funcionesRSA.h"
 
+
+
+const char hn[] = "SHA256";
+
 int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey){
 	RSA* rsa;
 	*pubKey = EVP_PKEY_new();
@@ -191,8 +195,11 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 		memcpy (&buff[SHA256_SIGLEN + 1], msg, msglen);
 		msglen = 0;
 	}
-	
-	ret = escribir(sockfd, (char*) buff);
+	if(MAX_MSG_LEN  < (msglen - SHA256_SIGLEN - 1))
+		ret = escribir(sockfd, (char*) buff, MAX_MSG_LEN);
+	else
+		ret = escribir(sockfd, (char*) buff, msglen + SHA256_SIGLEN + 1);
+
 	ret -= (SHA256_SIGLEN + 1);
 
 	/*SI EL MENSAJE ES DEMASIADO LARGO SE ENVIA EL RESTO DE LAS PARTES*/
@@ -209,7 +216,11 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 			memcpy (&buff[+ 1], &msg[ret], msglen);
 			msglen = 0;
 		}
-		ret += escribir(sockfd, (char*) buff);
+		if(MAX_MSG_LEN  < (msglen - SHA256_SIGLEN - 1))
+			ret += escribir(sockfd, (char*) buff, MAX_MSG_LEN);
+		else
+			ret += escribir(sockfd, (char*) buff, msglen + SHA256_SIGLEN + 1);
+
 		ret--;
  	}	
  	if (msglen == ret)
@@ -217,7 +228,32 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 	return 0;	
 }
 
-int main (){
+int reciveRSAkey(int sockfd, EVP_PKEY** pubKey){
+	char* buff = NULL;
+	int size = 0;
+	buff = (char*) malloc(sizeof(EVP_PKEY));
+	while(size < sizeof(EVP_PKEY)){
+		size += recibir(sockfd, &buff[size]);
+	}
+
+	*pubKey = (EVP_PKEY*) buff;
+	return 1;
+}
+int sendRSAkey(int sockfd, EVP_PKEY* privKey){
+	char* buff = (char*) privKey;
+	int size = 0;
+	while(size < sizeof(EVP_PKEY)){
+		if(size + MAX_MSG_LEN > sizeof(EVP_PKEY))
+			size += escribir(sockfd, &buff[size], MAX_MSG_LEN);
+		else
+			size += escribir(sockfd, &buff[size], sizeof(EVP_PKEY) - size);
+
+		printf("%d\n", size);
+	}
+	return 1;
+}
+
+/*int main (){
 
 	EVP_PKEY *privKey = NULL, *pubKey = NULL;
 	unsigned char msg[] = "Estos esta firmado con rsa"; 
@@ -233,8 +269,8 @@ int main (){
 
 	/**printf("FIRMA:");
 	for(i=0; i < slen; ++i)
-        printf("%02X", sig[i]);*/
+        printf("%02X", sig[i]);*//*
 	printf("Verificar firma\n");
 	printf("%d\n", verifySignRSA(pubKey, sig, msg, slen));
 	return EXIT_SUCCESS;
-}
+}*/

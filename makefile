@@ -10,6 +10,7 @@ server: obj/usuario.o obj/conexion.o objS/comandoss.o obj/comandos.o obj/linkedL
 cliente: obj/usuario.o obj/conexion.o objC/comandosu.o obj/comandos.o obj/linkedList.o objC/clientui.o src/cliente.c
 	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses
 
+# OBJETOS
 obj/usuario.o: src/usuario.c
 	@gcc $(FLAGS) -c -o obj/usuario.o src/usuario.c
 
@@ -40,11 +41,22 @@ obj/funcionesAES.o: src/funcionesAES.c
 
 
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
-	@gcc $(FLAGS) -o funcionesRSA src/funcionesRSA.c obj/conexion.o $(SSLLIBS)
+	gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
+
+
+
+# TESTS
+
+RSAkeys: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
+	@gcc $(FLAGS) -o serverRSA test/serverRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)	
+	@gcc $(FLAGS) -o clientRSA test/clientRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)
+
+#LIMPIEZA
 
 mrProper:
 	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES
 
+#GIT
 
 commit:
 	@git add .

@@ -39,7 +39,7 @@ int aceptar(int sockfd, struct sockaddr_in ip4addr);
 int abrirConnect(int sockfd, struct sockaddr ip4addr);
 int abrirListen(int sockfd);
 int recibir(int sockfd,char *buf);
-int escribir(int sockfd,char *msg);
+int escribir(int sockfd,char *msg, int mlen);
 char* atoIp(char* str);
 uint8_t obtenerIPInterface(char * interface, uint8_t* retorno);
 

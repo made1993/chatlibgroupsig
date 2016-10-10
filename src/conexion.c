@@ -554,7 +554,6 @@ int abrirConnect(int sockfd, struct sockaddr res){
 int recibir(int sockfd,char *buf){
 	int aux=0;
 	aux = recv(sockfd, buf, 8096, 0);
-	buf[aux]='\0';
 	if (aux==-1){
 		switch(errno){
 			case (EAGAIN || EWOULDBLOCK):
@@ -617,8 +616,9 @@ int recibir(int sockfd,char *buf){
  * Mario Valdemaro Garcia Roque (mariov.garcia@estudiante.uam.es)
  * Roberto Garcia Teodoro (roberto.garciat@estudiante.uam.es)
 */
-int escribir(int sockfd, char *msg){
-	int aux = send(sockfd, msg, strlen(msg), 0);
+int escribir(int sockfd, char *msg, int mlen){
+	int aux = send(sockfd, msg, mlen, 0);
+	printf("%d\n", aux);
 	if(-1==aux){
 		switch(errno){
 		 	case EACCES: 
