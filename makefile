@@ -47,14 +47,14 @@ obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
 
 # TESTS
 
-RSAkeys: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
-	@gcc $(FLAGS) -o serverRSA test/serverRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)	
-	@gcc $(FLAGS) -o clientRSA test/clientRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)
+testRSAkeys: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
+	@gcc $(FLAGS) -o TestServerRSA test/serverRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)	
+	@gcc $(FLAGS) -o TestClientRSA test/clientRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)
 
 #LIMPIEZA
 
 mrProper:
-	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES
+	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES Test*
 
 #GIT
 
