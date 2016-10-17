@@ -1,5 +1,5 @@
 
-FLAGS= -Wall -std=gnu99 -pedantic -O3
+FLAGS= -Wall -std=gnu99 -pedantic -O3 -Wcomment
 
 SSLLIBS= -lssl -lcrypto
 all: server cliente

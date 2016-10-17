@@ -551,9 +551,27 @@ int abrirConnect(int sockfd, struct sockaddr res){
  * Mario Valdemaro Garcia Roque (mariov.garcia@estudiante.uam.es)
  * Roberto Garcia Teodoro (roberto.garciat@estudiante.uam.es)
 */
-int recibir(int sockfd,char *buf){
-	int aux=0;
-	aux = recv(sockfd, buf, 8096, 0);
+int recibir(int sockfd,char** msg){
+	int aux = 0, size = 0;
+	char* buff;
+	
+	*msg = NULL;
+	buff = malloc(sizeof(char)* MAX_MSG_LEN );
+	
+	do{
+		aux = recv(sockfd, buff, 8096, 0);
+		
+		if(aux == -1) break;
+		
+		*msg = realloc(*msg, size + aux -1);
+		memcpy(&(*msg)[size], &buff[1], aux -1);
+
+		size += aux - 1;
+
+	}while(buff[0] == MORE_MSG);
+
+
+
 	if (aux==-1){
 		switch(errno){
 			case (EAGAIN || EWOULDBLOCK):
@@ -590,7 +608,7 @@ int recibir(int sockfd,char *buf){
 		}
 		return -1;
 	}
-	return aux;
+	return size;
 }
 
 /**
@@ -617,8 +635,40 @@ int recibir(int sockfd,char *buf){
  * Roberto Garcia Teodoro (roberto.garciat@estudiante.uam.es)
 */
 int escribir(int sockfd, char *msg, int mlen){
-	int aux = send(sockfd, msg, mlen, 0);
-	printf("%d\n", aux);
+	int aux = 0, pos = 0;
+	char* buff = NULL;
+	buff = malloc (sizeof(char) * MAX_MSG_LEN);
+	buff[0] = MORE_MSG;
+	do{
+		if(mlen - pos  < MAX_MSG_LEN - 1){
+			printf("menos de 8096 bytes: %d\n",  sizeof(char) * (mlen - pos + 1));
+			
+			buff = realloc(buff, sizeof(char) * (mlen - pos + 1));
+			printf("1\n");
+			buff[0] = LAST_MSG;
+			printf("2\n");
+			memcpy(&buff[1], &msg[pos], mlen - pos);
+			printf("3\n");
+			
+			aux = send(sockfd, buff, mlen - pos + 1, 0);
+			printf("4\n");
+			
+			if (aux == -1) break;
+			
+			pos += aux -1;
+			free(buff);
+		}
+		else{
+			printf("8096 bytes\n");
+			memcpy(&buff[1], &msg[aux], MAX_MSG_LEN - 1);
+			aux= send(sockfd, buff, MAX_MSG_LEN, 0);
+
+			if (aux == -1)
+				break;
+			pos += aux -1;
+		}
+	}while(pos != mlen);
+
 	if(-1==aux){
 		switch(errno){
 		 	case EACCES: 

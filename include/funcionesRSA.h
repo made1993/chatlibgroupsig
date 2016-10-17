@@ -11,6 +11,8 @@
 #include <openssl/err.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
+#include <openssl/x509.h>
+
 #include "conexion.h"
 
 
@@ -27,7 +29,7 @@
 *	
 *	
 **/
-int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey);
+int generateKeysRSA(EVP_PKEY** privKey, RSA** rsaPub);
 
 /**
 *	
@@ -100,6 +102,6 @@ int reciveRSAkey(int sockfd, EVP_PKEY** pubKey);
 *	
 *	
 **/
-int sendRSAkey(int sockfd, EVP_PKEY* privKey);
+int sendRSAkey(int sockfd, RSA* rsaPub);
 
 #endif
