@@ -564,11 +564,14 @@ int recibir(int sockfd,char** msg){
 		if(aux == -1) break;
 		
 		*msg = realloc(*msg, size + aux -1);
+
 		memcpy(&(*msg)[size], &buff[1], aux -1);
 
 		size += aux - 1;
 
 	}while(buff[0] == MORE_MSG);
+	
+	free(buff);
 
 
 
@@ -641,28 +644,22 @@ int escribir(int sockfd, char *msg, int mlen){
 	buff[0] = MORE_MSG;
 	do{
 		if(mlen - pos  < MAX_MSG_LEN - 1){
-			printf("menos de 8096 bytes: %d\n",  sizeof(char) * (mlen - pos + 1));
 			
 			buff = realloc(buff, sizeof(char) * (mlen - pos + 1));
-			printf("1\n");
 			buff[0] = LAST_MSG;
-			printf("2\n");
 			memcpy(&buff[1], &msg[pos], mlen - pos);
-			printf("3\n");
 			
 			aux = send(sockfd, buff, mlen - pos + 1, 0);
-			printf("4\n");
+
 			
 			if (aux == -1) break;
 			
 			pos += aux -1;
-			free(buff);
 		}
 		else{
-			printf("8096 bytes\n");
 			memcpy(&buff[1], &msg[aux], MAX_MSG_LEN - 1);
+			buff[0] = MORE_MSG;
 			aux= send(sockfd, buff, MAX_MSG_LEN, 0);
-
 			if (aux == -1)
 				break;
 			pos += aux -1;
@@ -729,6 +726,7 @@ int escribir(int sockfd, char *msg, int mlen){
 		}
 		return -1;
 	}            
-	return aux;  
+	free(buff);
+	return pos;  
 }
 

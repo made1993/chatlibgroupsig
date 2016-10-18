@@ -39,17 +39,14 @@ int main(){
 		return 0;
 	}
 
-	buff = malloc(sizeof(char) * 8096);
-	int i = 0;
-	for(i =0; i< 8096; i+=4)
-	{
-		memcpy(&buff[i], "HOLA", 8096);
-	}
-	escribir(sockfd, buff, 8096);
-	/*printf("esperando clave\n");
+
+	printf("esperando clave\n");
 	reciveRSAkey(sockfd, &pubkey);
 	printf("recibida clave\n");
 	status = reciveRSAsign(sockfd, pubkey, (unsigned char**) &buff);
-	printf("%d\n", status);*/
+	printf("recibida firma\n");
+	printf("%d\n", status);
+	printf("%s\n", buff);
+	close(sockfd);
 	return 1;
 }

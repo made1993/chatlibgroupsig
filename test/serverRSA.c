@@ -13,20 +13,20 @@ int main(){
 	
 	OpenSSL_add_all_algorithms();
 	generateKeysRSA(&privKey, &rsaPub);
-	signMsgRSA(privKey, msg, &sig, &slen);
+	signMsgRSA(privKey, msg, &sig, &slen, strlen( (char*)msg));
 	
 
 	sockfd = abrirSocketTCP();
 	abrirBind(sockfd, 8080);
 	abrirListen(sockfd);
-	printf("ESPERNAO CLIENTE\n");
+	printf("ESPERANDO CLIENTE\n");
 	socketcli=aceptar(sockfd, ip4addr);
-	printf ("%d\n", recibir(socketcli, &buff));
-	printf("%s\n", buff);
 	
-	//sendRSAkey(socketcli, rsaPub);
-	//printf("CLAVE RSA enviada\n");
-	//sendRSAsign(socketcli, privKey, msg, strlen((char*) msg));
-	//printf("firma enviada\n");
+	sendRSAkey(socketcli, rsaPub);
+	printf("CLAVE RSA enviada\n");
+	sendRSAsign(socketcli, privKey, msg, strlen((char*) msg));
+	printf("firma enviada\n");
+	close(socketcli);
+	close(sockfd);
 	return 0;
 }
