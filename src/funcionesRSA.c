@@ -4,10 +4,16 @@
 
 const char hn[] = "SHA256";
 
-int generateKeysRSA(EVP_PKEY** privKey, RSA** rsaPub){
+int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey){
 	RSA* rsa =  NULL;
 	*privKey = EVP_PKEY_new();
 	if(*privKey == NULL){
+		printf("ERR EVP_PKEY_new\n");
+		return 0;
+	}
+
+	*pubKey = EVP_PKEY_new();
+	if(*pubKey == NULL){
 		printf("ERR EVP_PKEY_new\n");
 		return 0;
 	}
@@ -24,7 +30,10 @@ int generateKeysRSA(EVP_PKEY** privKey, RSA** rsaPub){
 		return 0;
 	}
 
-	*rsaPub = RSAPublicKey_dup(rsa);
+	if(1 != EVP_PKEY_assign_RSA(*pubKey, RSAPublicKey_dup(rsa))){
+		printf("ERR EVP_PKEY_assign_RSA\n");
+		return 0;
+	}
 	return 1;
 }
 
@@ -177,8 +186,20 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 	return 1;
 }
 
+
+int msgToRSAkey(EVP_PKEY** pubKey, char* msg, int msglen){
+	if(pubKey == NULL || msg == NULL || msglen < 1) return 0;
+
+	*pubKey = EVP_PKEY_new();
+	if(*pubKey == NULL){
+		printf("ERR EVP_PKEY_new\n");
+		return 0;
+	}
+	d2i_PublicKey(EVP_PKEY_RSA ,pubKey, (const unsigned char**) &msg, msglen);
+	return 1;
+
+}
 int reciveRSAkey(int sockfd, EVP_PKEY** pubKey){
-	RSA * rsaPub = NULL;
 	char* buffKey;
 	int keylen = 0;
 
@@ -188,25 +209,25 @@ int reciveRSAkey(int sockfd, EVP_PKEY** pubKey){
 	keylen = recibir(sockfd, &buffKey);
 	if (keylen == -1)
 		return 0;
-	rsaPub = d2i_RSAPublicKey(&rsaPub, (const unsigned char**) &buffKey, keylen);
-	*pubKey = EVP_PKEY_new();
-	if(*pubKey == NULL){
-		printf("ERR EVP_PKEY_new\n");
-		return 0;
-	}
-	if(1 != EVP_PKEY_assign_RSA(*pubKey, rsaPub)){
-		printf("ERR EVP_PKEY_assign_RSA\n");
-		return 0;
-	}
+	
+	msgToRSAkey(pubKey, buffKey, keylen);
 	return 1;
 }
 
+int RSAkeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen){
 
-int sendRSAkey(int sockfd, RSA* rsaPub){
+	if(pubKey == NULL || msglen == NULL || msg == NULL) return 0;
+	
+	*msglen = i2d_PublicKey(pubKey, (unsigned char **)msg);
+
+	return 1;
+}
+
+int sendRSAkey(int sockfd, EVP_PKEY* pubKey){
 	char* buffKey = NULL;
 	int bufflen = 0;
-	
-	bufflen = i2d_RSAPublicKey(rsaPub, (unsigned char **)&buffKey);
+
+	if(!RSAkeyToMsg(pubKey, &buffKey, &bufflen)) return 0;
 
 	escribir(sockfd, buffKey, bufflen);
 	free(buffKey);

@@ -29,7 +29,7 @@
 *	
 *	
 **/
-int generateKeysRSA(EVP_PKEY** privKey, RSA** rsaPub);
+int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey);
 
 /**
 *	
@@ -79,6 +79,29 @@ int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, unsigned char** msg);
 **/
 int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msglen);
 
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int msgToRSAkey(EVP_PKEY** pubKey, char* msg, int msglen);
+
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int RSAkeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen);
 
 /**
 *	
@@ -102,6 +125,6 @@ int reciveRSAkey(int sockfd, EVP_PKEY** pubKey);
 *	
 *	
 **/
-int sendRSAkey(int sockfd, RSA* rsaPub);
+int sendRSAkey(int sockfd, EVP_PKEY* pubKey);
 
 #endif

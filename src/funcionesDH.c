@@ -56,26 +56,30 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 	EVP_PKEY_CTX* ctx = NULL;
 	size_t skeylen;
 	ctx = EVP_PKEY_CTX_new(privkey, NULL);
-
+	printf("1\n");
 	if (!ctx){
 		return NULL;
 	}
+	printf("2\n");
 	
 	if(EVP_PKEY_derive_init(ctx) <= 0){
 		EVP_PKEY_CTX_free(ctx);
 		return NULL;
 	}
+	printf("3\n");
 	
 	if (EVP_PKEY_derive_set_peer(ctx, peerkey) <= 0){
 		EVP_PKEY_CTX_free(ctx);
 		return NULL;
 	}
+	printf("4\n");
 
 	/* Determine buffer length */
 	if (EVP_PKEY_derive(ctx, NULL, &skeylen) <= 0){
 		EVP_PKEY_CTX_free(ctx);
 		return NULL;
 	}
+	printf("5\n");
 
 	skey = OPENSSL_malloc(skeylen);
 
@@ -83,6 +87,8 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 		EVP_PKEY_CTX_free(ctx);
 		return NULL;
 	}
+	printf("6\n");
+
 	if (EVP_PKEY_derive(ctx, skey, &skeylen) <= 0){
 		OPENSSL_free(skey);
 		EVP_PKEY_CTX_free(ctx);
@@ -92,14 +98,17 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 }
 
 int main(int argc, char** argv){
-	EVP_PKEY* params,* dhkey1,* dhkey2;
+	EVP_PKEY* params,* dhkey1,* dhkey2,* pubKey;
 	EVP_PKEY_CTX* kctx1,* kctx2;
 	unsigned char *skey;
+	char* buff;
+	int bufflen;
 
 	/* Use built-in parameters */
 	if(NULL == (params = EVP_PKEY_new())) return 0;
 	if(NULL == (dhkey1 = EVP_PKEY_new())) return 0;
 	if(NULL == (dhkey2 = EVP_PKEY_new())) return 0;
+	if(NULL == (pubKey = EVP_PKEY_new())) return 0;
 
 	/*Utiliza parametros ya inicializodos*/
 	getParamsIniDH(&params);
@@ -111,19 +120,23 @@ int main(int argc, char** argv){
 	genKeyFromParamsDH(&kctx1,&dhkey1, params);
 
 	/*generate key 2*/
-	genKeyFromParamsDH(&kctx2,&dhkey2, dhkey1);
-
+	genKeyFromParamsDH(&kctx2,&dhkey2, params);
 
 	
 	
 	skey = deriveSharedSecretDH(dhkey1, dhkey2);
-
+	if (skey == NULL)
+		return 0;
 	BIO_dump_fp(stdout, (const char*) skey, 256);
 	printf("\n");
 
 	OPENSSL_free(skey);
 
-	skey = deriveSharedSecretDH(dhkey2, dhkey1);	
+	bufflen = i2d_PublicKey(dhkey1, (unsigned char **)&buff);
+
+	d2i_PublicKey(EVP_PKEY_DH ,&pubKey, (const unsigned char**) &buff, bufflen);
+
+	skey = deriveSharedSecretDH(dhkey2, pubKey);	
 
 	BIO_dump_fp(stdout, (const char*) skey, 256);
 
