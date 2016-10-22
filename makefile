@@ -54,7 +54,7 @@ testRSAkeys: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
 #LIMPIEZA
 
 mrProper:
-	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES Test* main funciones*
+	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES Test* main funciones* main
 
 #GIT
 
