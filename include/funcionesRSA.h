@@ -89,7 +89,7 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 *	
 *	
 **/
-int msgToRSAkey(EVP_PKEY** pubKey, char* msg, int msglen);
+int msgToRSApubKey(EVP_PKEY** pubKey, char* msg, int msglen);
 
 /**
 *	
@@ -101,7 +101,7 @@ int msgToRSAkey(EVP_PKEY** pubKey, char* msg, int msglen);
 *	
 *	
 **/
-int RSAkeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen);
+int RSApubKeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen);
 
 /**
 *	

@@ -1,8 +1,16 @@
 
 #include "../include/funcionesDH.h"
 
+#include <openssl/dh.h>
+#include <openssl/evp.h>
+
 
 int getParamsIniDH(EVP_PKEY** params){
+	if(params == NULL) return 0;
+
+	*params = NULL;	
+	if(NULL == (*params = EVP_PKEY_new())) return 0;	 
+
 	if(1 != EVP_PKEY_set1_DH(*params,DH_get_2048_256())) return 0;
 	return 1;
 }
@@ -32,6 +40,11 @@ int genNewParamsIniDH(EVP_PKEY** params, EVP_PKEY_CTX** pctx){
 }
 
 int genKeyFromParamsDH(EVP_PKEY_CTX** kctx, EVP_PKEY** dhkey, EVP_PKEY* params){
+	
+	if(kctx == NULL || dhkey == NULL || params == NULL)
+	
+	*dhkey = NULL;
+	if(NULL == (*dhkey = EVP_PKEY_new())) return 0;
 	
 	/* Create context*/
 	if(!(*kctx = EVP_PKEY_CTX_new(params, NULL))){
@@ -97,21 +110,39 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 	return skey;
 }
 
+int DHpubKeyToMsg(EVP_PKEY* pubKey, char ** msg){
+	if(pubKey == NULL || msg == NULL) return 0;
+	*msg =  NULL;
+	return i2d_PUBKEY(pubKey, (unsigned char**) msg);
+}
+
+
+
+int msgToDHpubKey(EVP_PKEY** pubKey, char * msg, int msglen){
+	if(pubKey == NULL || msg == NULL || msglen < 1) return 0;
+
+	*pubKey = EVP_PKEY_new();
+	if(*pubKey == NULL){
+		printf("ERR EVP_PKEY_new\n");
+		return 0;
+	}
+	d2i_PUBKEY(pubKey, (const unsigned char**) &msg, msglen);
+	return 1;
+}
+
 int main(int argc, char** argv){
 	EVP_PKEY* params,* dhkey1,* dhkey2,* pubKey;
-	EVP_PKEY_CTX* kctx1,* kctx2;
+	EVP_PKEY_CTX* kctx1,* kctx2,* pctx;
+	DH* dhaux = NULL;
 	unsigned char *skey;
-	char* buff;
+	char* buff= NULL;
 	int bufflen;
 
-	/* Use built-in parameters */
-	if(NULL == (params = EVP_PKEY_new())) return 0;
-	if(NULL == (dhkey1 = EVP_PKEY_new())) return 0;
-	if(NULL == (dhkey2 = EVP_PKEY_new())) return 0;
-	if(NULL == (pubKey = EVP_PKEY_new())) return 0;
+
 
 	/*Utiliza parametros ya inicializodos*/
 	getParamsIniDH(&params);
+	
 	
 	/*Genera parametros nuevos*/
 	//genNewParamsIniDH(&params, &pctx);
@@ -122,23 +153,39 @@ int main(int argc, char** argv){
 	/*generate key 2*/
 	genKeyFromParamsDH(&kctx2,&dhkey2, params);
 
-	
-	
-	skey = deriveSharedSecretDH(dhkey1, dhkey2);
-	if (skey == NULL)
-		return 0;
+	/*bufflen = i2d_DHxparams(EVP_PKEY_get1_DH(dhkey1), (unsigned char**)&buff);
+	*/
+	bufflen = DHpubKeyToMsg(dhkey1, &buff);
+	printf("%d\n", bufflen);
+
+	pubKey = NULL;
+	msgToDHpubKey(&pubKey, buff, bufflen);
+
+	skey = deriveSharedSecretDH(dhkey2, pubKey);
+
 	BIO_dump_fp(stdout, (const char*) skey, 256);
-	printf("\n");
+
 
 	OPENSSL_free(skey);
 
-	bufflen = i2d_PublicKey(dhkey1, (unsigned char **)&buff);
+	bufflen = DHpubKeyToMsg(dhkey2, &buff);
+	printf("%d\n", bufflen);
 
-	d2i_PublicKey(EVP_PKEY_DH ,&pubKey, (const unsigned char**) &buff, bufflen);
+	pubKey = NULL;
+	msgToDHpubKey(&pubKey, buff, bufflen);
+
+	skey = deriveSharedSecretDH(dhkey1, pubKey);
+
+	BIO_dump_fp(stdout, (const char*) skey, 256);
+
+
+/*	if(EVP_PKEY_assign_DH(pubKey,dhaux)){
+		printf("asdas\n");
+	 	return 0;
+	}
 
 	skey = deriveSharedSecretDH(dhkey2, pubKey);	
 
-	BIO_dump_fp(stdout, (const char*) skey, 256);
 
 	OPENSSL_free(skey);
 
@@ -146,9 +193,7 @@ int main(int argc, char** argv){
 	EVP_PKEY_CTX_free(kctx2);
 	EVP_PKEY_free(dhkey1);
 	EVP_PKEY_free(dhkey2);
-	EVP_PKEY_free(params);
-
-
+	EVP_PKEY_free(params);*/
 	
 }
 

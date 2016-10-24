@@ -41,5 +41,9 @@ int genKeyFromParamsDH(EVP_PKEY_CTX** kctx, EVP_PKEY** dhkey, EVP_PKEY* params);
 */
 unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey);
 
+int DHpubKeyToMsg(EVP_PKEY* pubKey, char ** msg);
+
+int msgToDHpubKey(EVP_PKEY** pubKey, char * msg, int msglen);
+
 
 #endif

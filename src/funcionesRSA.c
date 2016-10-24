@@ -187,7 +187,7 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 }
 
 
-int msgToRSAkey(EVP_PKEY** pubKey, char* msg, int msglen){
+int msgToRSApubKey(EVP_PKEY** pubKey, char* msg, int msglen){
 	if(pubKey == NULL || msg == NULL || msglen < 1) return 0;
 
 	*pubKey = EVP_PKEY_new();
@@ -195,10 +195,20 @@ int msgToRSAkey(EVP_PKEY** pubKey, char* msg, int msglen){
 		printf("ERR EVP_PKEY_new\n");
 		return 0;
 	}
-	d2i_PublicKey(EVP_PKEY_RSA ,pubKey, (const unsigned char**) &msg, msglen);
+	d2i_PUBKEY(pubKey, (const unsigned char**) &msg, msglen);
 	return 1;
 
 }
+
+int RSApubKeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen){
+
+	if(pubKey == NULL || msglen == NULL || msg == NULL) return 0;
+	
+	*msglen = i2d_PUBKEY(pubKey, (unsigned char **)msg);
+
+	return 1;
+}
+
 int reciveRSAkey(int sockfd, EVP_PKEY** pubKey){
 	char* buffKey;
 	int keylen = 0;
@@ -211,15 +221,6 @@ int reciveRSAkey(int sockfd, EVP_PKEY** pubKey){
 		return 0;
 	
 	msgToRSAkey(pubKey, buffKey, keylen);
-	return 1;
-}
-
-int RSAkeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen){
-
-	if(pubKey == NULL || msglen == NULL || msg == NULL) return 0;
-	
-	*msglen = i2d_PublicKey(pubKey, (unsigned char **)msg);
-
 	return 1;
 }
 
