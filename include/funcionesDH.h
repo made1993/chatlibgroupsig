@@ -3,19 +3,13 @@
 #define FUNCIONESDH_H
 
 #include <openssl/pem.h>
-#include <openssl/ssl.h>
 #include <openssl/dh.h>
 #include <openssl/evp.h>
-#include <openssl/bio.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
-#include <openssl/dh.h>
-#include <openssl/evp.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
-#include <openssl/bn.h>
 #include <stdio.h>
 
+#include "conexion.h"
+
+#define DH_SECRET_LEN 256
 /*
 **	Usa  ua g y una p dada por generada con
 **	anterioridad por openssl que se usaran en el 

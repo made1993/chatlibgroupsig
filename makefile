@@ -34,14 +34,14 @@ objC/clientui.o: src/clientui.c
 	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
 
 obj/funcionesDH.o: src/funcionesDH.c
-	@gcc $(FLAGS) -o funcionesDH src/funcionesDH.c $(SSLLIBS)
+	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c $(SSLLIBS)
 
 obj/funcionesAES.o: src/funcionesAES.c
-	@gcc $(FLAGS) -o funcionesAES src/funcionesAES.c $(SSLLIBS)
+	@gcc $(FLAGS) -c -o obj/funcionesAES src/funcionesAES.c $(SSLLIBS)
 
 
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
-	gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
+	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
 
 
 
@@ -50,6 +50,14 @@ obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
 testRSAkeys: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerRSA test/serverRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)	
 	@gcc $(FLAGS) -o TestClientRSA test/clientRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)
+
+testDHkeys: test/serverDH.c test/clientDH.c obj/funcionesDH.o obj/conexion.o
+	@gcc $(FLAGS) -o TestServerDH test/serverDH.c obj/* $(SSLLIBS)
+	@gcc $(FLAGS) -o TestClientDH test/clientDH.c obj/* $(SSLLIBS)
+
+testAESkeys: test/AES.c obj/funcionesAES.o obj/conexion.o
+	@gcc $(FLAGS) -o TestAES test/AES.c obj/* $(SSLLIBS)
+
 
 #LIMPIEZA
 

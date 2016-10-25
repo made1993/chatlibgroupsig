@@ -13,14 +13,17 @@
 
 int main(){
 	struct addrinfo hints, *res;
-	char* buff;
+	char* msg;
+	unsigned char *skey;
+	int msglen;
 	
-	EVP_PKEY* pubkey;
+	EVP_PKEY* dhkey, * pubkey;
+	EVP_PKEY_CTX* ctx;
 
+	int sockfd;
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	int sockfd, status;
 
 	OpenSSL_add_all_algorithms();
 	/*Comenzamos la conexion TCP*/
@@ -37,8 +40,20 @@ int main(){
 		return 0;
 	}
 
+	msglen = recibir(sockfd, &msg);
+	msgToDHpubKey(&pubkey, msg, msglen);
+	genKeyFromParamsDH(&ctx,&dhkey, pubkey);
 
-	
+	free(msg);
+	msg = NULL;
+
+	skey = deriveSharedSecretDH(dhkey, pubkey);
+	BIO_dump_fp(stdout, (const char*) skey, 256);
+
+	msglen = DHpubKeyToMsg(dhkey, &msg);
+
+	escribir(sockfd, msg, msglen);
+
 	
 	close(sockfd);
 

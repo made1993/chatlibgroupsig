@@ -1,25 +1,16 @@
 #ifndef _SOCKET_H
 #define _SOCKET_H
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <netinet/in.h>
-#include <linux/udp.h>
 #include <linux/tcp.h>
-#include <signal.h>
-#include <time.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <unistd.h>
 #include <netinet/ether.h>
 #include <netinet/if_ether.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <inttypes.h>
-#include <math.h>
 
 #define MAX_MSG_LEN 8096
 #define LAST_MSG 0

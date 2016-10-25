@@ -1,12 +1,6 @@
 #ifndef FUNCIONESRSA_H
 #define FUNCIONESRSA_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <assert.h>
-
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <openssl/rsa.h>

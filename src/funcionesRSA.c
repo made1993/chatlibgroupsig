@@ -96,7 +96,6 @@ int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* 
 	const EVP_MD* md = NULL;
 
 	if(!msg || !sig || !slen || !key) {
-        assert(0);
         return -1;
     }
 
@@ -220,7 +219,7 @@ int reciveRSAkey(int sockfd, EVP_PKEY** pubKey){
 	if (keylen == -1)
 		return 0;
 	
-	msgToRSAkey(pubKey, buffKey, keylen);
+	msgToRSApubKey(pubKey, buffKey, keylen);
 	return 1;
 }
 
@@ -228,7 +227,7 @@ int sendRSAkey(int sockfd, EVP_PKEY* pubKey){
 	char* buffKey = NULL;
 	int bufflen = 0;
 
-	if(!RSAkeyToMsg(pubKey, &buffKey, &bufflen)) return 0;
+	if(!RSApubKeyToMsg(pubKey, &buffKey, &bufflen)) return 0;
 
 	escribir(sockfd, buffKey, bufflen);
 	free(buffKey);
