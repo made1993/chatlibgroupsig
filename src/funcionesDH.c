@@ -4,16 +4,23 @@
 
 
 int getParamsIniDH(EVP_PKEY** params){
-	if(params == NULL) return 0;
+	if(params == NULL)
+		return 0;
 
 	*params = NULL;	
-	if(NULL == (*params = EVP_PKEY_new())) return 0;	 
+	if(NULL == (*params = EVP_PKEY_new()))
+		return 0;	 
 
-	if(1 != EVP_PKEY_set1_DH(*params,DH_get_2048_256())) return 0;
+	if(1 != EVP_PKEY_set1_DH(*params,DH_get_2048_256()))
+		return 0;
+	
 	return 1;
 }
 
 int genNewParamsIniDH(EVP_PKEY** params, EVP_PKEY_CTX** pctx){
+	
+	if(pctx == NULL || params == NULL)
+		return 0;
 	*pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DH, NULL);
 	if(!*pctx){
 		return 0;
@@ -42,7 +49,8 @@ int genKeyFromParamsDH(EVP_PKEY_CTX** kctx, EVP_PKEY** dhkey, EVP_PKEY* params){
 	if(kctx == NULL || dhkey == NULL || params == NULL)
 	
 	*dhkey = NULL;
-	if(NULL == (*dhkey = EVP_PKEY_new())) return 0;
+	if(NULL == (*dhkey = EVP_PKEY_new())) 
+		return 0;
 	
 	/* Create context*/
 	if(!(*kctx = EVP_PKEY_CTX_new(params, NULL))){
@@ -66,6 +74,9 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 	unsigned char* skey = NULL;
 	EVP_PKEY_CTX* ctx = NULL;
 	size_t skeylen;
+	if(privkey == NULL || peerkey == NULL)
+		return 0;
+
 	ctx = EVP_PKEY_CTX_new(privkey, NULL);
 	if (!ctx){
 		return NULL;
@@ -103,7 +114,8 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 }
 
 int DHpubKeyToMsg(EVP_PKEY* pubKey, char ** msg){
-	if(pubKey == NULL || msg == NULL) return 0;
+	if(pubKey == NULL || msg == NULL)
+		return 0;
 	*msg =  NULL;
 	return i2d_PUBKEY(pubKey, (unsigned char**) msg);
 }
@@ -111,7 +123,8 @@ int DHpubKeyToMsg(EVP_PKEY* pubKey, char ** msg){
 
 
 int msgToDHpubKey(EVP_PKEY** pubKey, char * msg, int msglen){
-	if(pubKey == NULL || msg == NULL || msglen < 1) return 0;
+	if(pubKey == NULL || msg == NULL || msglen < 1)
+		return 0;
 
 	*pubKey = EVP_PKEY_new();
 	if(*pubKey == NULL){

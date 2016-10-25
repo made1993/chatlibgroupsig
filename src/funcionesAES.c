@@ -54,27 +54,3 @@ int decrypt_cbc256(EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv,
 	return deciphlen;
 
 }
-/*
-int main (int argc, char ** argv){
-	int i = 0, ciphlen = 0, deciphlen = 0;
-	unsigned char usr_key[] = "FkQCx$K9A:KWQo'P^/.6*qGRyXkRS";
-	unsigned char msg[] = "0123456789012345678901234567890123456789012345678901234567890123456789";
-	unsigned char ivec[] = "dontusethisinput";
-	unsigned char* cipher = NULL;
-	unsigned char* plain = NULL;
-	EVP_CIPHER_CTX* ctx = NULL;
-
-	ctx = create_ctx();
-
-
-
-	ciphlen = encrypt_cbc256(ctx, usr_key, ivec, msg, &cipher, strlen(msg)+1);
-	deciphlen = decrypt_cbc256(ctx, usr_key, ivec, cipher, &plain, ciphlen);
-
-
-	EVP_CIPHER_CTX_free(ctx);
-	free(cipher);
-	free(plain);
-	return 1;
-
-}*/

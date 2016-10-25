@@ -6,6 +6,9 @@ const char hn[] = "SHA256";
 
 int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey){
 	RSA* rsa =  NULL;
+	if(privKey == NULL || pubKey == NULL)
+		return 0
+
 	*privKey = EVP_PKEY_new();
 	if(*privKey == NULL){
 		printf("ERR EVP_PKEY_new\n");
@@ -41,6 +44,9 @@ int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey){
 int signMsgRSA(EVP_PKEY* key, const unsigned char* msg, unsigned char** sig, size_t* slen, size_t msglen){
 	EVP_MD_CTX* ctx = NULL;
 	const EVP_MD* md = NULL;
+	
+	if(keylen == NULL || msg == NULL || sig == NULL || slen == NULL)
+		return 0;
 
 	ctx = EVP_MD_CTX_create();
 	md = EVP_get_digestbyname(hn);
@@ -187,7 +193,8 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 
 
 int msgToRSApubKey(EVP_PKEY** pubKey, char* msg, int msglen){
-	if(pubKey == NULL || msg == NULL || msglen < 1) return 0;
+	if(pubKey == NULL || msg == NULL || msglen < 1)
+		return 0;
 
 	*pubKey = EVP_PKEY_new();
 	if(*pubKey == NULL){
@@ -201,7 +208,8 @@ int msgToRSApubKey(EVP_PKEY** pubKey, char* msg, int msglen){
 
 int RSApubKeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen){
 
-	if(pubKey == NULL || msglen == NULL || msg == NULL) return 0;
+	if(pubKey == NULL || msglen == NULL || msg == NULL)
+		return 0;
 	
 	*msglen = i2d_PUBKEY(pubKey, (unsigned char **)msg);
 
