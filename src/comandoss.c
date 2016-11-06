@@ -22,18 +22,18 @@ int sendPing(Usuario_t* usr){
 	if(usr==NULL || usr->socket == NULL
 		|| *usr->socket <= 0)
 		return -1;
-	return escribir(*usr->socket, CPING);
+	return escribir(*usr->socket, CPING, strlen(CPING)+1);
 
 }
 int sendPong(Usuario_t* usr){
 	if(usr==NULL || usr->socket == NULL
 		|| *usr->socket <= 0)
 		return -1;
-	return escribir(*usr->socket, CPONG);
+	return escribir(*usr->socket, CPONG, strlen(CPONG)+1);
 
 }
 
-int sendMsg(Usuario_t* usr, char* msg){
+int sendMsg(Usuario_t* usr, char* msg, int msglen){
 	
 	char* buff= NULL; 
 	int ret = 0;
@@ -50,7 +50,7 @@ int sendMsg(Usuario_t* usr, char* msg){
 	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
-	ret = escribir(*usr->socket, buff);
+	ret = escribir(*usr->socket, buff, msglen);
 	free(buff);
 	return ret;	
 }
@@ -69,7 +69,7 @@ int recvNick(Usuario_t* usr, char* msg){
 	return 0;
 
 }
-int recvMsg(char * msg){
+int recvMsg(char * msg, int msglen){
 	Node* nd = NULL;
 	Usuario_t* usr = NULL;
 	if(listaUsuarios == NULL || msg == NULL)
@@ -77,7 +77,7 @@ int recvMsg(char * msg){
 	nd = listaUsuarios->first;
 	while (nd != NULL){
 		usr = (Usuario_t*) nd->data;
-		escribir(*(usr->socket), msg);
+		escribir(*(usr->socket), msg, msglen);
 		nd= nd->next;
 	}
 
@@ -93,7 +93,7 @@ int recvDisconnect(Usuario_t* usr){
 int recvPing(Usuario_t* usr){
 	if(usr == NULL || usr->socket == NULL)
 		return -1;
-	return escribir(*usr->socket, CPONG);
+	return escribir(*usr->socket, CPONG, strlen(CPONG)+1);
 }
 
 int recvPong(Usuario_t* usr){
@@ -104,7 +104,7 @@ int recvPong(Usuario_t* usr){
 }
 
 
-int broadcastMsg(char * msg){
+int broadcastMsg(char * msg, int msglen){
 	Node* nd = NULL;
 	Usuario_t* usr = NULL;
 	if(listaUsuarios == NULL || msg == NULL)
@@ -113,7 +113,7 @@ int broadcastMsg(char * msg){
 	printf("enviado:%s\n", msg);
 	while (nd != NULL){
 		usr = (Usuario_t*) nd->data;
-		escribir(*(usr->socket), msg);
+		escribir(*(usr->socket), msg, msglen);
 		nd= nd->next;
 	}
 

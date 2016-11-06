@@ -1,18 +1,18 @@
 #include "../include/comandosu.h"
 
-int sendNick(int socket, char* msg){
+int sendNick(int socket, char* msg, int msglen){
 	char* buff= NULL;
 	int ret = 0;
 	if(nick == NULL)
 		return -1;
 	buff = malloc(sizeof(char) * (strlen(CNICK) + 2 + strlen(nick)));
 	sprintf(buff, "%s %s", CNICK, nick);
-	ret = escribir(socket, buff);
+	ret = escribir(socket, buff, msglen);
 	free(buff);
 	return ret;
 }
 
-int sendMsg(int socket, char* msg){
+int sendMsg(int socket, char* msg, int msglen){
 	char* buff= NULL; 
 	int ret = 0;
 	if(socket <= 0)
@@ -26,7 +26,7 @@ int sendMsg(int socket, char* msg){
 	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
-	ret = escribir(socket, buff);
+	ret = escribir(socket, buff,msglen);
 	free(buff);
 	return ret;
 
@@ -34,15 +34,15 @@ int sendMsg(int socket, char* msg){
 
 
 int sendDisconnect(int socket){
-	return escribir(socket, CDISCONNECT);
+	return escribir(socket, CDISCONNECT, strlen(CDISCONNECT)+1);
 }
 
 int sendPing(int socket){
-	return escribir(socket, CPING);
+	return escribir(socket, CPING, strlen(CPING)+1);
 }
 
 int sendPong(int socket){
-	return escribir(socket, CPONG);
+	return escribir(socket, CPONG, strlen(CPONG)+1);
 }
 
 int recvNick(){

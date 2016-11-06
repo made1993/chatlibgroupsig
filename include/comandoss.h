@@ -18,17 +18,17 @@ extern LinkedList* listaUsuarios;
 void* hiloPing(void* args);
 int sendPing(Usuario_t*);
 int sendPong(Usuario_t*);
-int sendMsg(Usuario_t*,  char* msg);
+int sendMsg(Usuario_t* usr, char* msg, int msglen);
 int sendNick(Usuario_t*, char* newNick);
 
 
 int recvNick(Usuario_t*, char* msg);
-int recvMsg(char* msg);
+int recvMsg(char* msg, int msglen);
 int recvDisconnect(Usuario_t*);
 int recvPing(Usuario_t*);
 int recvPong(Usuario_t*);
 
-int broadcastMsg(char * msg);
+int broadcastMsg(char * msg, int msglen);
 
 
 #endif

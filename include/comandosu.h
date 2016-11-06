@@ -8,8 +8,8 @@
 
 extern char* nick;
 
-int sendNick(int socket, char* nick);
-int sendMsg(int socket, char* str);
+int sendNick(int socket, char* nick, int nicklen);
+int sendMsg(int socket, char* str, int msglen);
 int sendDisconnect(int socket);
 int sendPing(int socket);
 int sendPong(int socket);
