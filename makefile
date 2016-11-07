@@ -2,6 +2,7 @@
 FLAGS= -Wall -std=gnu99 -pedantic -O3 -Wcomment
 
 SSLLIBS= -lssl -lcrypto
+FGLIBS = -lgroupsig
 all: server cliente
 
 server: obj/usuario.o obj/conexion.o objS/comandoss.o obj/comandos.o obj/linkedList.o src/server.c
@@ -42,6 +43,10 @@ obj/funcionesAES.o: src/funcionesAES.c
 
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
 	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
+
+
+obj/funcionesFG.o: src/funcionesFG.c
+	@gcc $(FLAGS) -o funcionesFG src/funcionesFG.c $(FGLIBS)
 
 
 
