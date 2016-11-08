@@ -1,16 +1,6 @@
 #include "../include/funcionesGS.h"
 #include "../include/conexion.h"
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/types.h>
 
 
 int main(int argc, char const **argv){
