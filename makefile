@@ -2,7 +2,7 @@
 FLAGS= -Wall -std=gnu99 -pedantic -O3 -Wcomment
 
 SSLLIBS= -lssl -lcrypto
-FGLIBS = -lgroupsig
+GSLIBS = -lgroupsig
 all: server cliente
 
 server: obj/usuario.o obj/conexion.o objS/comandoss.o obj/comandos.o obj/linkedList.o src/server.c
@@ -35,33 +35,36 @@ objC/clientui.o: src/clientui.c
 	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
 
 obj/funcionesDH.o: src/funcionesDH.c
-	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c $(SSLLIBS)
+	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c 
 
 obj/funcionesAES.o: src/funcionesAES.c
-	@gcc $(FLAGS) -c -o obj/funcionesAES src/funcionesAES.c $(SSLLIBS)
-
+	@gcc $(FLAGS) -c -o obj/funcionesAES src/funcionesAES.c 
 
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
 	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
 
 
-obj/funcionesFG.o: src/funcionesFG.c
-	@gcc $(FLAGS) -o funcionesFG src/funcionesFG.c $(FGLIBS)
+obj/funcionesGS.o: src/funcionesGS.c
+	@gcc $(FLAGS) -c -o obj/funcionesGS.o src/funcionesGS.c 
 
 
 
 # TESTS
 
-testRSAkeys: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
+testRSA: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerRSA test/serverRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)	
 	@gcc $(FLAGS) -o TestClientRSA test/clientRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)
 
-testDHkeys: test/serverDH.c test/clientDH.c obj/funcionesDH.o obj/conexion.o
+testDH: test/serverDH.c test/clientDH.c obj/funcionesDH.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerDH test/serverDH.c obj/* $(SSLLIBS)
 	@gcc $(FLAGS) -o TestClientDH test/clientDH.c obj/* $(SSLLIBS)
 
-testAESkeys: test/AES.c obj/funcionesAES.o obj/conexion.o
+testAES: test/AES.c obj/funcionesAES.o obj/conexion.o
 	@gcc $(FLAGS) -o TestAES test/AES.c obj/* $(SSLLIBS)
+
+testGS: test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
+	@gcc $(FLAGS) -o TestServerGS test/serverGS.c obj/* $(GSLIBS)
+	@gcc $(FLAGS) -o TestClientGS test/clientGS.c obj/* $(GSLIBS)
 
 
 #LIMPIEZA
