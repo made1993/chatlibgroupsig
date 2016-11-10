@@ -5,6 +5,10 @@
 #include <pthread.h>
 
 #include "../include/comandoss.h"
+#define PING_SLEEP 20
+#define PING_MAX 60
+#define PING_TIME 20
+
 
 pthread_t* hilos;
 
@@ -40,6 +44,25 @@ void* verificarCliente(void* args){
 	insert_list(listaUsuarios, usr);
 	return usr;
 }
+
+void* controlDeConexion(void* args){
+	Node* nd = NULL;
+	Usuario_t* usr = NULL;
+	int pingt;
+	while(1){
+		nd = listaUsuarios->first;
+		while (nd != NULL){
+			usr = (Usuario_t*) nd->data;
+			pingt = getCurrentPingt(usr);
+			if(pingt > PING_TIME){
+				sendPing(usr);
+			}
+			nd= nd->next;
+		}
+		sleep(PING_TIME);
+	}
+}
+
 void* lecturaUsuario(void* args){
 	char * buff = NULL;
 	int bufflen, end = 0;

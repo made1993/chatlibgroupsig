@@ -64,6 +64,12 @@ int sendNick(Usuario_t* usr, char* nick){
 	broadcastMsg(msg, strlen(msg)+1);
 	return 0;
 }
+int sendDisconnect(Usuario_t* usr){
+	escribir(*usr->socket, CDISCONNECT, strlen(CDISCONNECT)+1);
+	delete_elem_list(listaUsuarios, (void*) usr);
+	liberarUsuario(usr);
+	return 0;
+}
 
 
 
@@ -94,7 +100,6 @@ int recvMsg(char * msg, int msglen){
 
 int recvDisconnect(Usuario_t* usr){
 	delete_elem_list(listaUsuarios, (void*) usr);
-	printf("eliminado de la lista\n");
 	liberarUsuario(usr);
 	return 0;
 }
@@ -119,13 +124,9 @@ int broadcastMsg(char * msg, int msglen){
 	if(listaUsuarios == NULL || msg == NULL)
 		return -1;
 	nd = listaUsuarios->first;
-	printf("enviado:%s\n", msg);
 	while (nd != NULL){
-		printf("1\n");
 		usr = (Usuario_t*) nd->data;
-		printf("%s\n", usr->nick);
 		escribir(*(usr->socket), msg, msglen);
-		printf("3\n");
 		nd= nd->next;
 	}
 
