@@ -137,3 +137,9 @@
 /MSG server bienvenido
 /MSG server bienvenido
 /MSG server bienvenido
+/MSG server bienvenido
+/MSG server bienvenido
+/MSG server bienvenido
+/MSG server bienvenido
+/MSG server bienvenido
+/MSG iGNUcius /DISCONNNECT

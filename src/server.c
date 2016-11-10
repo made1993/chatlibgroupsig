@@ -42,9 +42,9 @@ void* verificarCliente(void* args){
 }
 void* lecturaUsuario(void* args){
 	char * buff = NULL;
-	int bufflen;
+	int bufflen, end = 0;
 	Usuario_t* usr = verificarCliente(args);
-	while(1){
+	while(!end){
 
 		if((bufflen=recibir(*usr->socket, &buff)) == -1)
 			break;
@@ -66,6 +66,7 @@ void* lecturaUsuario(void* args){
 			case DISCONNECT:
 				printf("DISCONNECT\n");
 				recvDisconnect(usr);
+				end = 1;
 			break;
 
 			case PING:
@@ -89,9 +90,6 @@ void* lecturaUsuario(void* args){
 		free(buff);
 	}
 	printf("Usuario desconectado\n");
-	delete_elem_list( listaUsuarios,(void*) usr);
-	liberarUsuario(usr);
-	free(buff);
 	return NULL;
 }
 

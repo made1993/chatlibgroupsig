@@ -169,6 +169,8 @@ int main(int argc , char *argv[]){
 	pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );
 
 	hiloLectura(NULL);
+	printf("cosa\n");
+	destroyClientUI();
 	close(sockfd);
 	free(nick);
 	

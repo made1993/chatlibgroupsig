@@ -86,6 +86,7 @@ int recvMsg(char * msg, int msglen){
 
 int recvDisconnect(Usuario_t* usr){
 	delete_elem_list(listaUsuarios, (void*) usr);
+	printf("eliminado de la lista\n");
 	liberarUsuario(usr);
 	return 0;
 }
