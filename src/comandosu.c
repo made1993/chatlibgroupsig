@@ -1,33 +1,34 @@
 #include "../include/comandosu.h"
 
-int sendNick(int socket, char* msg, int msglen){
+int sendNick(int socket, char* msg, int nicklen){
 	char* buff= NULL;
 	int ret = 0;
 	if(nick == NULL)
 		return -1;
 	buff = malloc(sizeof(char) * (strlen(CNICK) + 2 + strlen(nick)));
 	sprintf(buff, "%s %s", CNICK, nick);
-	ret = escribir(socket, buff, msglen);
+	ret = escribir(socket, buff, nicklen + strlen(CNICK) + 1);
 	free(buff);
 	return ret;
 }
 
 int sendMsg(int socket, char* msg, int msglen){
 	char* buff= NULL; 
-	int ret = 0;
+	int ret = 0, bufflen = 0;
 	if(socket <= 0)
 		return -1;
 	if(nick == NULL || strlen(nick) > NICK_MAX_LEN || msg == NULL)
 		return -1;
-
-	buff = malloc(10 + strlen(nick) + strlen(msg));
-	buff= strcat(buff, CMSG);
+	bufflen = strlen(CMSG) + strlen(nick) + msglen + 2;
+	buff = malloc(bufflen);
+	buff= strcpy(buff, (char*)CMSG);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
-	ret = escribir(socket, buff,msglen);
+	ret = escribir(socket, buff, bufflen);
 	free(buff);
+	buff = NULL;
 	return ret;
 
 }
@@ -52,24 +53,14 @@ int recvNick(){
 int recvMsg(char* msg){
 	char* nick = NULL;
 	char* content = NULL;
-	char* pch = NULL;
-	char* str= NULL;
-	int nlen = 0;
+	char* str =  NULL;
 	FILE* f;
 	f = fopen("trash.txt", "a");
 	fprintf(f, "%s\n", msg);
-	msg += strlen(CNICK);
-	pch = strchr(msg, ' ');
-	nlen = pch - msg;
-	nick = malloc(sizeof(char) * (nlen + 1));
-	strncpy(nick, msg, nlen);
-
-	msg += nlen + 1;
 	
-	content = malloc(sizeof(char) * (strlen(msg) + 1));
-	strcpy(content, msg);
-	str = malloc(sizeof(char) * (strlen(nick) + strlen(content)) + 1 );
-	sprintf(str,"%s:%s", nick, content);
+	parseMsg(msg, &nick, &content);
+	str = malloc(strlen(nick) + strlen(content) +2);
+	sprintf(str, "%s:%s", nick, content);
 	printMsg(str);
 	free(str);
 	free(nick);

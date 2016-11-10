@@ -19,23 +19,25 @@ pthread_t h1, h2;
 char* nick;
 void* hiloEscritura(void* args){
 	char* msg = NULL;
+	int end = 0;
 	if(sockfd ==-1)
 		return NULL;
-	while (1){
+	while (!end){
 
 		msg = scanMsg();
 		switch(comando(msg)){
 			case NICK:
-				sendNick(sockfd, msg);
+				sendNick(sockfd, msg, strlen(msg)+1);
 			break;
 			case MSG:
-				escribir(sockfd ,msg);
+				escribir(sockfd , msg, strlen(msg)+1);
 			break;
 			case MSG2:
-				sendMsg(sockfd, msg);
+				sendMsg(sockfd, msg, strlen(msg)+1);
 			break;
 			case DISCONNECT:
 				sendDisconnect(sockfd);
+				end = 1;
 			break;
 			case PING:
 				sendPing(sockfd);
@@ -45,18 +47,19 @@ void* hiloEscritura(void* args){
 			break;
 		}
 		free(msg);
+		msg = NULL;
 	}
-	free(msg);
 	return NULL;
 }
 
 
 void* hiloLectura(void* args){
-	char* msg= malloc(8096);
+	char* msg = NULL;
+	int end = 0;
 	if(sockfd ==-1)
 		return NULL;
-	while(1){
-		recibir(sockfd, msg);
+	while(!end){
+		recibir(sockfd, &msg);
 		switch(comando(msg)){
 			case NICK:
 				recvNick();
@@ -66,6 +69,7 @@ void* hiloLectura(void* args){
 			break;
 			case DISCONNECT:
 				recvDisconnect(sockfd);
+				end = 1;
 			break;
 			case PING:
 				recvPing(sockfd);
@@ -79,7 +83,7 @@ void* hiloLectura(void* args){
 }
 
 int identificacion(char* nick){
-	return sendNick(sockfd, nick);
+	return sendNick(sockfd, nick, strlen(nick)+1);
 }
 
 int main(int argc , char *argv[]){
@@ -165,6 +169,8 @@ int main(int argc , char *argv[]){
 	pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );
 
 	hiloLectura(NULL);
+	close(sockfd);
+	free(nick);
 	
 	return 0;
  

@@ -12,17 +12,19 @@ LinkedList* listaUsuarios;
 
 void* verificarCliente(void* args){
 	int* socket = NULL;
-	char * buff = malloc(8096);
+	char * buff = NULL;
+	int bufflen;
 	socket = (int*) args;
 	Usuario_t* usr = NULL;
 	usr = crearUsuario(socket);
 	while(1){
 
-		if(recibir(*socket, buff) == -1){
+		if(recibir(*socket, &buff) == -1){
 			close(*socket);
 			return NULL;
 		}
-		if(strlen(buff) == 0){
+		printf("%s\n", buff);
+		if((bufflen = strlen(buff)) < 1){
 			close(*socket);
 			return NULL;
 		}
@@ -30,7 +32,7 @@ void* verificarCliente(void* args){
 		if(comando(buff)== NICK){
 			recvNick(usr, buff);
 			printf("Se registro %s\n", usr->nick);
-			escribir(*usr->socket, "/MSG server bienvenido");
+			escribir(*usr->socket, "/MSG server bienvenido", strlen((char*)"/MSG server bienvenido")+1);
 			break;
 		}
 
@@ -39,44 +41,52 @@ void* verificarCliente(void* args){
 	return usr;
 }
 void* lecturaUsuario(void* args){
-	char * buff = malloc(8096);
+	char * buff = NULL;
+	int bufflen;
 	Usuario_t* usr = verificarCliente(args);
 	while(1){
 
-		if(recibir(*usr->socket, buff) == -1)
+		if((bufflen=recibir(*usr->socket, &buff)) == -1)
 			break;
 		if(strlen(buff) == 0)
 			break;
-		printf("%s\n", buff);
+		fwrite(buff, 1, bufflen, stdout);
+		printf("bufflen: [%d]\n", bufflen);
 		switch (comando(buff)){
 			case NICK:
+				printf("NICK\n");
 				recvNick(usr, buff);
 			break;
 
 			case MSG:
-				recvMsg(buff);
+				printf("MSG\n");
+				recvMsg(buff, bufflen);
 			break;
 
 			case DISCONNECT:
+				printf("DISCONNECT\n");
 				recvDisconnect(usr);
 			break;
 
 			case PING:
+				printf("PING\n");
 				recvPing(usr);
 			break;
 
-			case PONG:
+			case PONG:			
+				printf("PONG\n");
 				recvPong(usr);
 			break;
 
 			default:
+				printf("default\n");
 
 			break;
 
 
 
 		}
-		printf("[%s]\n", buff);
+		free(buff);
 	}
 	printf("Usuario desconectado\n");
 	delete_elem_list( listaUsuarios,(void*) usr);

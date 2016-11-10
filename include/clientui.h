@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define BUFF_LEN 8096 
+
 void getWIndowSize();
 
 WINDOW *createNewWin(int height, int width, int starty, int startx);

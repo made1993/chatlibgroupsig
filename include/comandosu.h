@@ -5,6 +5,7 @@
 #include "conexion.h"
 #include "comandos.h"
 #include "clientui.h"
+#include "parser.h"
 
 extern char* nick;
 

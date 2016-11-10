@@ -65,9 +65,9 @@ void printMsg(char* msg){
 }
 char* scanMsg(){
 	char* str;
-	str = malloc(sizeof(char) * 8000);
-	mvwgetstr(win4, 0, 0, str);
-
+	str = malloc(BUFF_LEN);
+	mvwgetnstr(win4, 0, 0, str, BUFF_LEN);
+	str = realloc(str, strlen(str)+1);
 	destroyWin(win4);
 	win4 = createNewWinHidden(4, col -2 , row - 5, 1);
 	return str;
@@ -92,13 +92,7 @@ void destroyClientUI(){
 
 
 
-/*int main (){
-	createClientUI();
-	printMsg("hola");
-	scanMsg();
-	destroyClientUI();
 
-}
 /*int main(int argc, char** argv){
 	int row, col;
 	WINDOW* win1, * win2, * win3, * win4;
