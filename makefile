@@ -12,43 +12,43 @@ cliente: obj/usuario.o obj/conexion.o obj/comandos.o obj/parser.o obj/linkedList
 	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses
 
 # OBJETOS
-obj/usuario.o: src/usuario.c
+obj/usuario.o: src/usuario.c include/usuario.h
 	@gcc $(FLAGS) -c -o obj/usuario.o src/usuario.c
 
-obj/conexion.o: src/conexion.c
+obj/conexion.o: src/conexion.c include/conexion.h
 	@gcc $(FLAGS) -c -o obj/conexion.o src/conexion.c
 
-objC/comandosu.o: src/comandosu.c 
+objC/comandosu.o: src/comandosu.c include/comandosu.h
 	@gcc $(FLAGS) -c -o objC/comandosu.o src/comandosu.c
 
-objS/comandoss.o: src/comandoss.c 
+objS/comandoss.o: src/comandoss.c include/comandoss.h
 	@gcc $(FLAGS) -c -o objS/comandoss.o src/comandoss.c
 
-obj/parser.o: src/parser.c
+obj/parser.o: src/parser.c include/parser.h
 	@gcc $(FLAGS) -c -o obj/parser.o src/parser.c
 
-obj/comandos.o: src/comandos.c
+obj/comandos.o: src/comandos.c include/comandos.h
 	@gcc $(FLAGS) -c -o obj/comandos.o src/comandos.c
 
-obj/linkedList.o: src/linkedList.c
+obj/linkedList.o: src/linkedList.c include/linkedList.h
 	@gcc $(FLAGS) -c -o obj/linkedList.o src/linkedList.c 
 
-objC/clientui.o: src/clientui.c
+objC/clientui.o: src/clientui.c include/linkedList.h
 	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
 
 
 
-obj/funcionesDH.o: src/funcionesDH.c
+obj/funcionesDH.o: src/funcionesDH.c include/funcionesDH.h
 	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c 
 
-obj/funcionesAES.o: src/funcionesAES.c
+obj/funcionesAES.o: src/funcionesAES.c include/funcionesAES.h
 	@gcc $(FLAGS) -c -o obj/funcionesAES src/funcionesAES.c 
 
-obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o
+obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o include/funcionesRSA.h
 	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
 
 
-obj/funcionesGS.o: src/funcionesGS.c
+obj/funcionesGS.o: src/funcionesGS.c include/funcionesGS.h
 	@gcc $(FLAGS) -c -o obj/funcionesGS.o src/funcionesGS.c 
 
 

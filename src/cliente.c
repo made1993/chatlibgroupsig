@@ -25,9 +25,14 @@ void* hiloEscritura(void* args){
 	while (!end){
 
 		msg = scanMsg();
+		if(strlen(msg) == 0){
+			free(msg);
+			msg = NULL;
+			continue;
+		}
 		switch(comando(msg)){
 			case NICK:
-				sendNick(sockfd, msg, strlen(msg)+1);
+				escribir(sockfd, msg, strlen(msg)+1);
 			break;
 			case MSG:
 				escribir(sockfd , msg, strlen(msg)+1);
@@ -49,20 +54,24 @@ void* hiloEscritura(void* args){
 		free(msg);
 		msg = NULL;
 	}
+
+	pthread_cancel(h2);
 	return NULL;
 }
 
 
 void* hiloLectura(void* args){
 	char* msg = NULL;
-	int end = 0;
+	int end = 0, ret = 0;
 	if(sockfd ==-1)
 		return NULL;
 	while(!end){
-		recibir(sockfd, &msg);
+		if((ret = recibir(sockfd, &msg)) < 1)
+			break;
+		
 		switch(comando(msg)){
 			case NICK:
-				recvNick();
+				recvNick(msg);
 			break;
 			case MSG:
 				recvMsg(msg);
@@ -79,6 +88,7 @@ void* hiloLectura(void* args){
 			break;
 		}
 	}
+	pthread_cancel(h1);
 	return NULL;
 }
 
@@ -166,10 +176,9 @@ int main(int argc , char *argv[]){
 	identificacion(nick);
 
 	/*Creacion de los hilos*/
-	pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );
-
-	hiloLectura(NULL);
-	printf("cosa\n");
+	//pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );
+	pthread_create(&h2,NULL, hiloLectura, (void *)NULL );
+	hiloEscritura(NULL);
 	destroyClientUI();
 	close(sockfd);
 	free(nick);

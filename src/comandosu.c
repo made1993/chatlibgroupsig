@@ -46,7 +46,21 @@ int sendPong(int socket){
 	return escribir(socket, CPONG, strlen(CPONG)+1);
 }
 
-int recvNick(){
+int recvNick(char* msg){
+	char* nick1 = NULL, *nick2 = NULL;
+	char* str;
+	parseNick(msg, &nick1, &nick2);
+	if(nick1 == NULL || nick2 == NULL)
+		return -1;
+
+	if(strcmp(nick1, nick) == 0)
+		strcpy(nick, nick2);
+	str =  malloc(strlen(nick1) + strlen(nick2) + strlen((char*)"ahora es") + 3);
+	sprintf(str, "%s ahora es %s",nick1, nick2);
+	printMsg(str);
+	free(str);
+	free(nick1);
+	free(nick2);
 	return 0;
 }
 

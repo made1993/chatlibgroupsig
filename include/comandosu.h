@@ -16,7 +16,7 @@ int sendPing(int socket);
 int sendPong(int socket);
 
 
-int recvNick();
+int recvNick(char* msg);
 int recvMsg(char* msg);
 int recvDisconnect(int socket);
 int recvPing(int socket);

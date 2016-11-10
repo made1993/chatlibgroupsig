@@ -560,8 +560,11 @@ int recibir(int sockfd,char** msg){
 	
 	do{
 		aux = recv(sockfd, buff, 8096, 0);
-		
-		if(aux == -1) break;
+		if(aux < 1){
+			printf("%d\n", aux);
+			free(*msg);
+			break;
+		}
 		
 		*msg = realloc(*msg, size + aux -1);
 
@@ -648,17 +651,18 @@ int escribir(int sockfd, char *msg, int mlen){
 			buff = realloc(buff, sizeof(char) * (mlen - pos + 1));
 			buff[0] = LAST_MSG;
 			memcpy(&buff[1], &msg[pos], mlen - pos);
-			
+			printf("%d : %d\n", mlen, pos);
 			aux = send(sockfd, buff, mlen - pos + 1, 0);
 
 			
-			if (aux == -1) break;
+			if (aux < 1) break;
 			
 			pos += aux -1;
 		}
 		else{
 			memcpy(&buff[1], &msg[aux], MAX_MSG_LEN - 1);
 			buff[0] = MORE_MSG;
+			printf("%d : %d\n", mlen, pos);
 			aux= send(sockfd, buff, MAX_MSG_LEN, 0);
 			if (aux == -1)
 				break;

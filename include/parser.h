@@ -6,7 +6,7 @@
 #include <string.h>
 #include "comandos.h"
 
-int parseNick();
+int parseNick(char* src, char** nick1, char ** nick2);
 
 int parseMsg(char* src, char** nick, char ** msg);
 

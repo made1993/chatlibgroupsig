@@ -55,31 +55,39 @@ int sendMsg(Usuario_t* usr, char* msg, int msglen){
 	return ret;	
 }
 
+int sendNick(Usuario_t* usr, char* nick){
+	char* msg =  NULL;
+	if(usr == NULL || nick == NULL || strlen(nick) < 1)
+		return -1;
+	msg =  malloc(strlen(CNICK) + strlen(usr->nick) + strlen(nick) +3);
+	sprintf(msg, "%s %s %s", CNICK, usr->nick, nick);
+	broadcastMsg(msg, strlen(msg)+1);
+	return 0;
+}
 
 
 
 int recvNick(Usuario_t* usr, char* msg){
-	char* nick= NULL;
+	char* nick1 = NULL, * nick2 = NULL;
+	
 	if (usr == NULL || msg== NULL)
 		return -1;
-	nick = msg + strlen(CNICK)+1;
-	setNick(usr, nick);
+
+	parseNick(msg, &nick1, &nick2);
+	if(nick2 != NULL)
+		return -1;
+	sendNick(usr, nick1);
+
+	setNick(usr, nick1);
 
 
 	return 0;
 
 }
 int recvMsg(char * msg, int msglen){
-	Node* nd = NULL;
-	Usuario_t* usr = NULL;
-	if(listaUsuarios == NULL || msg == NULL)
+	if(listaUsuarios == NULL || msg == NULL || msglen < 1)
 		return -1;
-	nd = listaUsuarios->first;
-	while (nd != NULL){
-		usr = (Usuario_t*) nd->data;
-		escribir(*(usr->socket), msg, msglen);
-		nd= nd->next;
-	}
+	broadcastMsg(msg, msglen);
 
 	return 0;
 }
@@ -113,8 +121,11 @@ int broadcastMsg(char * msg, int msglen){
 	nd = listaUsuarios->first;
 	printf("enviado:%s\n", msg);
 	while (nd != NULL){
+		printf("1\n");
 		usr = (Usuario_t*) nd->data;
+		printf("2\n");
 		escribir(*(usr->socket), msg, msglen);
+		printf("3\n");
 		nd= nd->next;
 	}
 

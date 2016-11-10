@@ -45,11 +45,10 @@ void* lecturaUsuario(void* args){
 	int bufflen, end = 0;
 	Usuario_t* usr = verificarCliente(args);
 	while(!end){
-
-		if((bufflen=recibir(*usr->socket, &buff)) == -1)
+		if((bufflen = recibir(*usr->socket, &buff)) < 1){
+			printf("cosas extrañas pueden pasar\n");
 			break;
-		if(strlen(buff) == 0)
-			break;
+		}
 		fwrite(buff, 1, bufflen, stdout);
 		printf("bufflen: [%d]\n", bufflen);
 		switch (comando(buff)){
@@ -102,14 +101,18 @@ int main(){
 	struct sockaddr_in ip4addr;
 
 	socket = abrirSocketTCP();
+	if(socket < 1)
+		return 0;
 
-	abrirBind(socket, 8080);
+	if(abrirBind(socket, 8080) ==  -1)
+		return 0;
 
 	abrirListen(socket);
 
 	listaUsuarios = create_list(compareUsr);
 
 	while(1){
+		printf("nuevo cliente\n");
 		socketcli= malloc(sizeof(int));
 		*socketcli=aceptar(socket, ip4addr);
 		usuarios++;
@@ -118,6 +121,7 @@ int main(){
 		pthread_create(&hilos[usuarios-1],NULL, lecturaUsuario, (void*) socketcli );
 		
 	}
+	printf("fin\n");
 	return 0;
 }
 

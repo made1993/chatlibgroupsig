@@ -1,9 +1,35 @@
 #include "../include/parser.h"
 
 
-int parseNick(){
+int parseNick(char* src, char** nick1, char ** nick2){
+	char *pch1 = NULL, *pch2 = NULL;	
+	*nick1 =  NULL;
+	*nick2 =  NULL;
+	
+	if(src == NULL || strlen(src) < 1 || nick1 == NULL || nick2 == NULL){
+		return -1;
+	}
+	if((pch1 = strchr(src, ' ')) == NULL)
+		return -1;
+	pch1++;
+
+	if((pch2 = strchr(pch1, ' ')) == NULL){
+		*nick1 = malloc(strlen(pch1) + 1);
+		memcpy(*nick1, pch1, strlen(pch1) + 1);
+	}
+	else{
+		*nick1 = malloc(pch2 - pch1 +1);
+		memcpy(*nick1, pch1, pch2 - pch1);
+		(*nick1)[pch2 - pch1] = '\0';
+	}
+	if(pch2 == NULL)
+		return 0;
+	pch2 ++;
+	*nick2 = malloc(strlen(pch2) + 1);
+	memcpy(*nick2, pch2, strlen(pch2) + 1);
 	return 0;
 }
+
 int parseMsg(char* src, char** nick, char ** msg){
 	int msglen = 0;
 	int nlen = 0;

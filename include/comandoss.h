@@ -5,6 +5,8 @@
 #include "comandos.h"
 #include "usuario.h"
 #include "linkedList.h"
+#include "parser.h"
+
 extern LinkedList* listaUsuarios;
 
 /**
