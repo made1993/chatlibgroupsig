@@ -123,7 +123,7 @@ int broadcastMsg(char * msg, int msglen){
 	while (nd != NULL){
 		printf("1\n");
 		usr = (Usuario_t*) nd->data;
-		printf("2\n");
+		printf("%s\n", usr->nick);
 		escribir(*(usr->socket), msg, msglen);
 		printf("3\n");
 		nd= nd->next;

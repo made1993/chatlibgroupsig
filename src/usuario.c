@@ -85,9 +85,8 @@ int compareUsr(const void* data1, const void* data2){
 	
 	usr1= (Usuario_t*) data1;
 	usr2= (Usuario_t*) data2;
-
 	if (usr1->id == usr2->id)
-		return 1;
-	else
 		return 0;
+	else
+		return 1;
 }

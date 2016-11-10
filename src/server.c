@@ -46,6 +46,7 @@ void* lecturaUsuario(void* args){
 	Usuario_t* usr = verificarCliente(args);
 	while(!end){
 		if((bufflen = recibir(*usr->socket, &buff)) < 1){
+			printf( "%d\n", delete_elem_list(listaUsuarios, (void*) usr));
 			printf("cosas extrañas pueden pasar\n");
 			break;
 		}
@@ -104,10 +105,11 @@ int main(){
 	if(socket < 1)
 		return 0;
 
-	if(abrirBind(socket, 8080) ==  -1)
+	if(abrirBind(socket, 8080) < 0)
 		return 0;
 
-	abrirListen(socket);
+	if(abrirListen(socket) == -1)
+		return 0;
 
 	listaUsuarios = create_list(compareUsr);
 
