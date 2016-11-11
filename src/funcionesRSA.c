@@ -7,7 +7,7 @@ const char hn[] = "SHA256";
 int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey){
 	RSA* rsa =  NULL;
 	if(privKey == NULL || pubKey == NULL)
-		return 0
+		return 0;
 
 	*privKey = EVP_PKEY_new();
 	if(*privKey == NULL){
@@ -45,7 +45,7 @@ int signMsgRSA(EVP_PKEY* key, const unsigned char* msg, unsigned char** sig, siz
 	EVP_MD_CTX* ctx = NULL;
 	const EVP_MD* md = NULL;
 	
-	if(keylen == NULL || msg == NULL || sig == NULL || slen == NULL)
+	if(msg == NULL || sig == NULL || slen == NULL)
 		return 0;
 
 	ctx = EVP_MD_CTX_create();

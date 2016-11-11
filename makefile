@@ -36,7 +36,10 @@ obj/linkedList.o: src/linkedList.c include/linkedList.h
 objC/clientui.o: src/clientui.c include/linkedList.h
 	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
 
+#PROTOCOLOS CRIPTOGRAFICOS
 
+cripto: obj/funcionesDH.o obj/funcionesAES.o obj/funcionesRSA.o obj/funcionesGS.o
+	@echo "compilados los protocolos criptograficos"
 
 obj/funcionesDH.o: src/funcionesDH.c include/funcionesDH.h
 	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c 
@@ -45,7 +48,7 @@ obj/funcionesAES.o: src/funcionesAES.c include/funcionesAES.h
 	@gcc $(FLAGS) -c -o obj/funcionesAES src/funcionesAES.c 
 
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o include/funcionesRSA.h
-	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
+	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c $(SSLLIBS)
 
 
 obj/funcionesGS.o: src/funcionesGS.c include/funcionesGS.h
