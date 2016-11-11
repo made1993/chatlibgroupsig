@@ -50,11 +50,8 @@ obj/funcionesAES.o: src/funcionesAES.c include/funcionesAES.h
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o include/funcionesRSA.h
 	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c $(SSLLIBS)
 
-
 obj/funcionesGS.o: src/funcionesGS.c include/funcionesGS.h
 	@gcc $(FLAGS) -c -o obj/funcionesGS.o src/funcionesGS.c 
-
-
 
 # TESTS
 
