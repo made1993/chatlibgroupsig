@@ -38,10 +38,10 @@ int main(){
 		  
 		return 0;
 	}
-
+	RSAfileToPubKey(&pubkey, "pubKey.txt");
 
 	printf("esperando clave\n");
-	reciveRSAkey(sockfd, &pubkey);
+	//reciveRSAkey(sockfd, &pubkey);
 	printf("recibida clave\n");
 	status = reciveRSAsign(sockfd, pubkey, (unsigned char**) &buff);
 	printf("recibida firma\n");

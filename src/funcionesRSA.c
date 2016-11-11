@@ -216,6 +216,74 @@ int RSApubKeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen){
 	return 1;
 }
 
+int RSAfileToPubKey(EVP_PKEY** pubKey, char* fname){
+	FILE * f = NULL;
+	if(pubKey == NULL || fname == NULL || strlen(fname)<1)
+		 return 0;
+	f = fopen(fname, "r");
+	if (f == NULL)
+		return 0;
+	*pubKey = EVP_PKEY_new();
+	if(*pubKey == NULL){
+		printf("ERR EVP_PKEY_new\n");
+		return 0;
+	}
+	d2i_PUBKEY_fp(f, pubKey);
+	fclose(f);
+	if(*pubKey == NULL)
+		return 0;
+	return 1;
+}
+
+int RSApubKeyToFile(EVP_PKEY* pubKey, char* fname, int* msglen){
+	FILE * f = NULL;
+	if(pubKey == NULL || fname == NULL || strlen(fname)<1 || msglen == NULL)
+		 return 0;
+	f = fopen(fname, "w");
+	if (f == NULL)
+		return 0;
+	*msglen = i2d_PUBKEY_fp(f, pubKey);
+	fclose(f);
+	if(*msglen < 1)
+		return 0;
+	return 1;
+
+}
+
+int RSAfileToPrivKey(EVP_PKEY** privKey, char* fname){
+	FILE * f = NULL;
+	if(privKey == NULL || fname == NULL || strlen(fname)<1)
+		 return 0;
+	f = fopen(fname, "r");
+	if (f == NULL)
+		return 0;
+	*privKey = EVP_PKEY_new();
+	if(*privKey == NULL){
+		printf("ERR EVP_PKEY_new\n");
+		return 0;
+	}
+	PEM_read_PrivateKey(f, privKey, NULL, NULL);
+	fclose(f);
+	if(*privKey == NULL)
+		return 0;
+	return 1;
+}
+
+int RSAprivKeyToFile(EVP_PKEY* privKey, char* fname, int* msglen){
+	FILE * f = NULL;
+	if(privKey == NULL || fname == NULL || strlen(fname)<1 || msglen == NULL)
+		 return 0;
+	f = fopen(fname, "w");
+	if (f == NULL)
+		return 0;
+	*msglen =  PEM_write_PrivateKey(f , privKey, NULL, NULL, 0, 0, NULL);
+	fclose(f);
+	if(*msglen < 1)
+		return 0;
+	return 1;
+
+}
+
 int reciveRSAkey(int sockfd, EVP_PKEY** pubKey){
 	char* buffKey;
 	int keylen = 0;

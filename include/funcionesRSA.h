@@ -6,6 +6,7 @@
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
+#include <openssl/pem.h>
 
 #include "conexion.h"
 
@@ -107,8 +108,56 @@ int RSApubKeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen);
 *	
 *	
 **/
-int reciveRSAkey(int sockfd, EVP_PKEY** pubKey);
+int RSAfileToPubKey(EVP_PKEY** pubKey, char* fname);
 
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int RSApubKeyToFile(EVP_PKEY* pubKey, char* fname, int* msglen);
+
+
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int RSAfileToPrivKey(EVP_PKEY** privKey, char* fname);
+
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int RSAprivKeyToFile(EVP_PKEY* privKey, char* fname, int* msglen);
+
+/**
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+*	
+**/
+int reciveRSAkey(int sockfd, EVP_PKEY** pubKey);
 /**
 *	
 *	
