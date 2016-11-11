@@ -1,24 +1,55 @@
 #include "../include/comandosu.h"
 
-int sendNick(int socket, char* msg, int nicklen){
-	char* buff= NULL;
-	int ret = 0;
-	if(nick == NULL)
+int sendNick(int socket, char* msg, int msglen){
+	char* buff= NULL, *pch1 =  NULL, *pch2 =  NULL;
+	int ret = 0, nicklen = 0;
+	if(socket == -1 || msg == NULL || msglen < 1){
+		printMsg("NICK ERROR");
 		return -1;
-	buff = malloc(sizeof(char) * (strlen(CNICK) + 2 + strlen(nick)));
-	sprintf(buff, "%s %s", CNICK, nick);
+	}
+	if(strncmp(CNICK, msg, strlen(CNICK))!=0){
+		buff = malloc(sizeof(char) * (strlen(CNICK) + 2 + strlen(msg)));
+		sprintf(buff, "%s %s", CNICK, msg);
+		ret = escribir(socket, buff, msglen + strlen(CNICK) + 1);
+		free(buff);
+		return ret;	
+	}
+
+	pch1 = strchr(msg, ' ');
+	if (pch1 == NULL){
+		printMsg("NICK ERROR");
+		return -1;
+	}
+	pch1++;
+	pch2= strchr(pch1, ' ');
+	if(pch2 != NULL){
+		printMsg("NICK ERROR");
+		return -1;
+	}
+	nicklen =  strlen(pch1)+1;
+	if(nicklen < 2 || nicklen > NICK_MAX_LEN){
+		printMsg("La longuitud del NICK es incorrecta");
+		return -1;
+	}
+	buff = malloc(strlen(CNICK) + 1 + nicklen );
+	sprintf(buff, "%s %s", CNICK, pch1);
 	ret = escribir(socket, buff, nicklen + strlen(CNICK) + 1);
 	free(buff);
+
 	return ret;
 }
 
 int sendMsg(int socket, char* msg, int msglen){
 	char* buff= NULL; 
 	int ret = 0, bufflen = 0;
-	if(socket <= 0)
+	if(socket == -1){
+		printMsg("MSG ERROR");
 		return -1;
-	if(nick == NULL || strlen(nick) > NICK_MAX_LEN || msg == NULL)
+	}
+	if(nick == NULL || strlen(nick) > NICK_MAX_LEN || msg == NULL){
+		printMsg("MSG ERROR");
 		return -1;
+	}
 	bufflen = strlen(CMSG) + strlen(nick) + msglen + 2;
 	buff = malloc(bufflen);
 	buff= strcpy(buff, (char*)CMSG);
@@ -50,8 +81,10 @@ int recvNick(char* msg){
 	char* nick1 = NULL, *nick2 = NULL;
 	char* str;
 	parseNick(msg, &nick1, &nick2);
-	if(nick1 == NULL || nick2 == NULL)
+	if(nick1 == NULL || nick2 == NULL){
+		printMsg("NICK ERROR");
 		return -1;
+	}
 
 	if(strcmp(nick1, nick) == 0)
 		strcpy(nick, nick2);
@@ -74,7 +107,7 @@ int recvMsg(char* msg){
 	
 	parseMsg(msg, &nick, &content);
 	str = malloc(strlen(nick) + strlen(content) +2);
-	sprintf(str, "%s:%s", nick, content);
+	sprintf(str, "%s: %s", nick, content);
 	printMsg(str);
 	free(str);
 	free(nick);
@@ -84,13 +117,34 @@ int recvMsg(char* msg){
 }
 
 int recvPing(int socket){
+	if(socket == -1){
+		printMsg("PING ERROR");
+		return -1;
+	}
 	return sendPong(socket);
 }
 int recvPong(){
 	
 	return 0;
 }	
-int recvDisconnect(int socket){
+int recvDisconnect(char* msg){
+	char* pch1 =  NULL, *pch2 = NULL;
+	char * buff;
+	pch1 =  strchr(msg, ' ');
+	if(pch1 == NULL)
+		return 0;
+	pch1++;
+	pch2 =  strchr(pch1, ' ');
+	if(pch2 == NULL)
+		return 0;
+	if(strcmp(nick, pch1)== 0){
+		printMsg("Has sido desconectado del servidor");
+		return 1;
+	}
+	buff = malloc(strlen("Se ha desconectado") + 2 + strlen(pch1));
+	sprintf(buff, "Se ha desconectado %s", pch1);
+	printMsg(buff);
+
 	return 0;
 }
 

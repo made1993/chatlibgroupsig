@@ -1,33 +1,17 @@
 #include "../include/comandoss.h"
 #include <time.h>
 
-void* hiloPing(void* args){
-	Usuario_t* usr = NULL;
-	if (args == NULL)
-		return NULL;
-	usr = (Usuario_t*)args;
-
-	while (1){
-		if(usr->pingt >= 30){
-			sendPing(usr);
-		}
-		else{
-			sleep(30);
-		}
-	}
-	return NULL;
-}
 
 int sendPing(Usuario_t* usr){
 	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket <= 0)
+		|| *usr->socket == -1)
 		return -1;
 	return escribir(*usr->socket, CPING, strlen(CPING)+1);
 
 }
 int sendPong(Usuario_t* usr){
 	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket <= 0)
+		|| *usr->socket == -1)
 		return -1;
 	return escribir(*usr->socket, CPONG, strlen(CPONG)+1);
 
@@ -39,7 +23,7 @@ int sendMsg(Usuario_t* usr, char* msg, int msglen){
 	int ret = 0;
 	char* nick= usr->nick;
 	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket <= 0)
+		|| *usr->socket == -1)
 		return -1;
 	if(nick == NULL || strlen(nick) > NICK_MAX_LEN || msg == NULL)
 		return -1;
@@ -65,6 +49,9 @@ int sendNick(Usuario_t* usr, char* nick){
 	return 0;
 }
 int sendDisconnect(Usuario_t* usr){
+	if(usr==NULL || usr->socket == NULL
+		|| *usr->socket == -1)
+		return -1;
 	escribir(*usr->socket, CDISCONNECT, strlen(CDISCONNECT)+1);
 	delete_elem_list(listaUsuarios, (void*) usr);
 	liberarUsuario(usr);
@@ -126,7 +113,8 @@ int broadcastMsg(char * msg, int msglen){
 	nd = listaUsuarios->first;
 	while (nd != NULL){
 		usr = (Usuario_t*) nd->data;
-		escribir(*(usr->socket), msg, msglen);
+		if(usr->socket != NULL && *usr->socket != -1)
+			escribir(*(usr->socket), msg, msglen);
 		nd= nd->next;
 	}
 

@@ -32,7 +32,7 @@ void* hiloEscritura(void* args){
 		}
 		switch(comando(msg)){
 			case NICK:
-				escribir(sockfd, msg, strlen(msg)+1);
+				sendNick(sockfd, msg, strlen(msg)+1);
 			break;
 			case MSG:
 				escribir(sockfd , msg, strlen(msg)+1);
@@ -41,8 +41,7 @@ void* hiloEscritura(void* args){
 				sendMsg(sockfd, msg, strlen(msg)+1);
 			break;
 			case DISCONNECT:
-				sendDisconnect(sockfd);
-				end = 1;
+				end = sendDisconnect(sockfd);
 			break;
 			case PING:
 				sendPing(sockfd);
@@ -77,7 +76,7 @@ void* hiloLectura(void* args){
 				recvMsg(msg);
 			break;
 			case DISCONNECT:
-				recvDisconnect(sockfd);
+				recvDisconnect();
 				end = 1;
 			break;
 			case PING:
