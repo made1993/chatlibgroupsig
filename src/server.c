@@ -5,9 +5,9 @@
 #include <pthread.h>
 
 #include "../include/comandoss.h"
-#define PING_SLEEP 20
+#define PING_SLEEP 30
 #define PING_MAX 60
-#define PING_TIME 20
+#define PING_TIME 30
 
 
 pthread_t* hilos;
@@ -39,6 +39,10 @@ void* verificarCliente(void* args){
 			escribir(*usr->socket, "/MSG server bienvenido", strlen((char*)"/MSG server bienvenido")+1);
 			break;
 		}
+		else{
+			escribir(*usr->socket, "/DISCONNECT", strlen((char*)"/DISCONNECT")+1);
+
+		}
 
 	}
 	insert_list(listaUsuarios, usr);
@@ -48,18 +52,24 @@ void* verificarCliente(void* args){
 void* controlDeConexion(void* args){
 	Node* nd = NULL;
 	Usuario_t* usr = NULL;
-	int pingt;
+	unsigned int pingt;
 	while(1){
 		nd = listaUsuarios->first;
 		while (nd != NULL){
 			usr = (Usuario_t*) nd->data;
-			pingt = getCurrentPingt(usr);
-			if(pingt > PING_TIME){
+			pingt = getPingt(usr);
+			if((unsigned)time(NULL)- pingt > PING_TIME){
 				sendPing(usr);
+			}
+			else if((unsigned)time(NULL) - pingt > PING_MAX){
+				sendDisconnect(usr);
+				delete_elem_list(listaUsuarios, (void*) usr);
+				liberarUsuario(usr);
+
 			}
 			nd= nd->next;
 		}
-		sleep(PING_TIME);
+		sleep(PING_SLEEP);
 	}
 }
 
@@ -70,6 +80,7 @@ void* lecturaUsuario(void* args){
 	while(!end){
 		if((bufflen = recibir(*usr->socket, &buff)) < 1){
 			printf( "%d\n", delete_elem_list(listaUsuarios, (void*) usr));
+			liberarUsuario(usr);
 			printf("cosas extrañas pueden pasar\n");
 			break;
 		}
@@ -121,7 +132,7 @@ int main(){
 	int socket;
 	int* socketcli;
 	int usuarios = 0;
-	
+	pthread_t hiloPing;
 	struct sockaddr_in ip4addr;
 
 	socket = abrirSocketTCP();
@@ -135,11 +146,11 @@ int main(){
 		return 0;
 
 	listaUsuarios = create_list(compareUsr);
-
+	pthread_create(&hiloPing,NULL, controlDeConexion, NULL );
 	while(1){
-		printf("nuevo cliente\n");
 		socketcli= malloc(sizeof(int));
 		*socketcli=aceptar(socket, ip4addr);
+		printf("nuevo cliente\n");
 		usuarios++;
 		hilos= realloc(hilos, sizeof(pthread_t)*usuarios);
 

@@ -22,7 +22,7 @@ int sendPing(Usuario_t*);
 int sendPong(Usuario_t*);
 int sendMsg(Usuario_t* usr, char* msg, int msglen);
 int sendNick(Usuario_t*, char* newNick);
-
+int sendDisconnect(Usuario_t* usr);
 
 int recvNick(Usuario_t*, char* msg);
 int recvMsg(char* msg, int msglen);

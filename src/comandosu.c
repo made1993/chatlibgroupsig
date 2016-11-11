@@ -130,6 +130,8 @@ int recvPong(){
 int recvDisconnect(char* msg){
 	char* pch1 =  NULL, *pch2 = NULL;
 	char * buff;
+	if(strcmp(msg, CDISCONNECT) == 0)
+		return 1;
 	pch1 =  strchr(msg, ' ');
 	if(pch1 == NULL)
 		return 0;

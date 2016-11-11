@@ -100,6 +100,7 @@ int recvPing(Usuario_t* usr){
 int recvPong(Usuario_t* usr){
 	if(usr == NULL || usr->socket == NULL)
 		return -1;
+	printf("se recibe pong\n");
 	setCurrentPingt(usr);
 	return 0;
 }

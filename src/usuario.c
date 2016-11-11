@@ -12,6 +12,7 @@ Usuario_t* crearUsuario(int* socket){
 	usr->nick = malloc(NICK_MAX_LEN + 1);
 	usr->socket = malloc(sizeof(int));
 	*usr->socket = *socket;
+	setCurrentPingt(usr);
 	return usr;
 }
 
@@ -71,7 +72,7 @@ int setCurrentPingt(Usuario_t* usr){
 	return 0;
 }
 
-int getCurrentPingt(Usuario_t* usr){
+int getPingt(Usuario_t* usr){
 	if(usr == NULL)
 		return -1;
 	return usr->pingt;

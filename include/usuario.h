@@ -30,7 +30,7 @@ int setId(Usuario_t* usr, int id);
 int getId(Usuario_t* usr);
 
 int setCurrentPingt(Usuario_t* usr);
-int getCurrentPingt(Usuario_t* usr);
+int getPingt(Usuario_t* usr);
 
 int compareUsr(const void* usr1, const void* usr2);
 
