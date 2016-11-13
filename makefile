@@ -11,7 +11,7 @@ server: obj/usuario.o obj/conexion.o obj/comandos.o obj/parser.o obj/linkedList.
 cliente: obj/usuario.o obj/conexion.o obj/comandos.o obj/parser.o obj/linkedList.o objC/comandosu.o objC/clientui.o  src/cliente.c
 	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses
 
-# OBJETOS
+# OBJETOS CHAT
 obj/usuario.o: src/usuario.c include/usuario.h
 	@gcc $(FLAGS) -c -o obj/usuario.o src/usuario.c
 
