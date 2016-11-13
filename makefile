@@ -71,6 +71,12 @@ testGS: test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
 	@gcc $(FLAGS) -o TestClientGS test/clientGS.c obj/* $(GSLIBS)
 
 
+#GENERAR CLAVES
+RSAkeys:
+	@openssl genrsa -out privkey.pem 2048
+	@openssl rsa -in privkey.pem -pubout > pubkey.pub
+
+
 #LIMPIEZA
 
 mrProper:

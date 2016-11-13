@@ -15,12 +15,12 @@ int main(){
 	int socketcli;
 	
 	OpenSSL_add_all_algorithms();
-	generateKeysRSA(&privKey, &pubKey);
+	//generateKeysRSA(&privKey, &pubKey);
 	
-	RSApubKeyToFile(pubKey, "pubKey.txt", &w);
+	//RSApubKeyToFile(pubKey, "pubKey.txt", &w);
 
-	RSAprivKeyToFile(pubKey, "privKey.txt", &w);
-	printf("ret->%d\n", RSAfileToPrivKey(&privKey, "test-key.pem"));
+	//RSAprivKeyToFile(pubKey, "privKey.txt", &w);
+	printf("ret->%d\n", RSAfileToPrivKey(&privKey, "privkey.pem"));
 	sockfd = abrirSocketTCP();
 	abrirBind(sockfd, 8080);
 	abrirListen(sockfd);

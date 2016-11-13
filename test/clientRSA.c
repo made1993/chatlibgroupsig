@@ -26,6 +26,7 @@ int main(){
 
 	OpenSSL_add_all_algorithms();
 	/*Comenzamos la conexion TCP*/
+	RSAfileToPubKey(&pubkey, "pubkey.pub");
 	if(0!=getaddrinfo("127.0.0.1", "8080", &hints, &res)){
 		printf("No se pudo conectar con el servidor\n");
 		return 0;
@@ -38,7 +39,7 @@ int main(){
 		  
 		return 0;
 	}
-	RSAfileToPubKey(&pubkey, "pubKey.txt");
+
 
 	printf("esperando clave\n");
 	//reciveRSAkey(sockfd, &pubkey);

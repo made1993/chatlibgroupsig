@@ -107,7 +107,6 @@ int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* 
 
 	ctx = EVP_MD_CTX_create();
 	md = EVP_get_digestbyname(hn);
-
 	if(md == NULL){
 		printf("ERR EVP_get_digestbyname\n");
 		return 0;		
@@ -116,26 +115,21 @@ int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* 
 		printf("ERR EVP_MD_CTX_create\n");
 		return 0;		
 	}
-
 	if(1 != EVP_DigestInit_ex(ctx, md, NULL)){
 		printf("ERR EVP_DigestInit_ex\n");
 		return 0;
 	}
-
 	if(1 != EVP_DigestVerifyInit(ctx, NULL, md, NULL, key)){
 		printf("ERR EVP_DigestVerifyInit\n");
 		return 0;
 	}
 
-
 	if(1 != EVP_DigestVerifyUpdate(ctx, msg, msglen)){
 		printf("ERR EVP_DigestVerifyUpdate\n");
 		return 0;
 	}
-
 	ERR_clear_error();
 
-	
 
 	return EVP_DigestVerifyFinal(ctx, sig, slen);
 }
@@ -150,7 +144,6 @@ int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, unsigned char** msg){
 
 	if(msglen == -1)
 		return 0;	
-
 	sig = malloc(sizeof(char) * SHA256_SIGLEN);
 	auxMsg =  malloc(sizeof(char) * (msglen - SHA256_SIGLEN));
 
@@ -219,7 +212,7 @@ int RSApubKeyToMsg(EVP_PKEY* pubKey, char** msg, int* msglen){
 int RSAfileToPubKey(EVP_PKEY** pubKey, char* fname){
 	FILE * f = NULL;
 	if(pubKey == NULL || fname == NULL || strlen(fname)<1)
-		 return 0;
+		return 0;
 	f = fopen(fname, "r");
 	if (f == NULL)
 		return 0;
@@ -228,7 +221,7 @@ int RSAfileToPubKey(EVP_PKEY** pubKey, char* fname){
 		printf("ERR EVP_PKEY_new\n");
 		return 0;
 	}
-	d2i_PUBKEY_fp(f, pubKey);
+	PEM_read_PUBKEY(f, pubKey,  NULL, NULL);
 	fclose(f);
 	if(*pubKey == NULL)
 		return 0;
@@ -242,7 +235,8 @@ int RSApubKeyToFile(EVP_PKEY* pubKey, char* fname, int* msglen){
 	f = fopen(fname, "w");
 	if (f == NULL)
 		return 0;
-	*msglen = i2d_PUBKEY_fp(f, pubKey);
+	*msglen = PEM_write_PUBKEY(f, pubKey);
+	//*msglen = i2d_PUBKEY_fp(f, pubKey);
 	fclose(f);
 	if(*msglen < 1)
 		return 0;
