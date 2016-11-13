@@ -81,7 +81,7 @@ RSAkeys:
 
 mrProper:
 	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES Test* main funciones* main
-
+	@rm -f *.pub *.pem *.txt
 #GIT
 
 commit:

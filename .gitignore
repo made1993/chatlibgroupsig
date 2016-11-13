@@ -8,3 +8,7 @@ Test*
 main
 msg.txt
 sig.txt
+privkey*
+pubkey*
+*.pem
+*.txt
