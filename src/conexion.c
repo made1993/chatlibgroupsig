@@ -731,3 +731,227 @@ int escribir(int sockfd, char *msg, int mlen){
 	return pos;  
 }
 
+int sendClientCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
+		const unsigned char* text, int textlen, groupsig_key_t *grpkey, groupsig_key_t *memkey,
+						int scheme){
+	int msglen = 0, bufflen = 0, siglen = 0;
+	char*  msg = NULL, *buff = NULL, *sigstr;
+	if(socket == -1 || ctx == NULL || key == NULL || iv == NULL || text == NULL || textlen < 1
+		|| grpkey == NULL || memkey == NULL)
+		return 0;
+
+
+	siglen = signMsgGS(grpkey, memkey, scheme, (char*)text, &sigstr);
+	msglen = sigMsgToStrGS((char*)text, textlen, sigstr, siglen, &msg);
+
+	bufflen = encrypt_cbc256(ctx, key, iv, (const unsigned char*)msg, (unsigned char**)&buff, msglen);
+	
+	if(bufflen <1)
+		return 0;
+	msglen = escribir(socket, buff, bufflen);
+	free(sigstr);
+	free(msg);
+	free(buff);
+	return msglen;
+}
+
+int reciveServerCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
+		groupsig_key_t *grpkey, char** msg){
+	int msglen = 0, bufflen = 0, siglen = 0;
+	char* buff = NULL, *text =  NULL, *sigstr =  NULL;
+	
+	if(socket == -1 || ctx == NULL || key == NULL || iv == NULL	|| grpkey == NULL || msg == NULL)
+		return 0;
+
+	bufflen = recibir(socket, &buff);
+	msglen = decrypt_cbc256(ctx, key, iv, (const unsigned char*)buff, (unsigned char**)&text, bufflen);
+	
+	strToSigMsgGS(msg, &msglen, &sigstr, &siglen, text);
+	if(!verifySignGS(sigstr, grpkey, *msg))
+		return 0;
+	free(sigstr);
+	free(text);
+	free(buff);
+	return msglen;
+}
+
+int sendServerCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
+		const unsigned char* text, int textlen){
+	int msglen = 0;
+	char*  msg = NULL;
+	if(socket == -1 || ctx == NULL || key == NULL || iv == NULL || text == NULL || textlen < 1)
+		return 0;
+	
+	msglen = encrypt_cbc256(ctx, key, iv, text, (unsigned char**)&msg, textlen);
+	if(msglen <1)
+		return 0;
+	msglen = escribir(socket, msg, msglen);
+	free(msg);
+	return msglen;
+}
+
+
+int reciveClientCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
+		char** msg){
+	int bufflen = 0, msglen =0;
+	char*  buff = NULL;
+	if(socket == -1 || ctx == NULL || key == NULL || iv == NULL || msg == NULL )
+		return 0;
+	bufflen = recibir(socket, &buff);
+	if(bufflen <1)
+		return 0;
+	msglen = decrypt_cbc256(ctx, key, iv, (const unsigned char*)buff, (unsigned char**)msg, bufflen);
+	free(buff);
+	return msglen;
+}
+
+int clientInitSConexion(int socket, EVP_PKEY* pubKeyRSA , groupsig_key_t *grpkey, groupsig_key_t *memkey,
+						int scheme, unsigned char** skey, unsigned char** iv){
+	EVP_PKEY* DHkey = NULL, *DHpeerKey = NULL;
+	EVP_PKEY_CTX* pctxDH = NULL;
+	char* sigstr = NULL, *msg = NULL, *buff = NULL;
+	int siglen = 0, msglen = 0, bufflen = 0;
+
+	if(socket < 0 || pubKeyRSA == NULL || grpkey == NULL || memkey ==  NULL || skey == NULL || iv == NULL){
+		return -1;
+	}
+
+	/*CHECK RSA MSG*/
+	if(!reciveRSAsign(socket, pubKeyRSA, (unsigned char**) &buff))
+		return -1;
+
+	/*DERIVE AES KEY*/
+	msgToDHpubKey(&DHpeerKey, buff, bufflen);
+	genKeyFromParamsDH(&pctxDH,&DHkey, DHpeerKey);
+	free(buff); buff = NULL;
+
+	*skey = deriveSharedSecretDH(DHkey, pubKeyRSA);
+
+	/*SEND SIGNED PUBKEY DH*/
+	msglen = DHpubKeyToMsg(DHkey, &msg);
+
+	siglen = signMsgGS(grpkey, memkey, scheme, msg, &sigstr);
+	bufflen = sigMsgToStrGS(msg, msglen, sigstr, siglen, &buff);
+
+	escribir(socket, buff, bufflen);
+
+	free(buff); buff = NULL;
+	free(msg); msg = NULL;
+	free(sigstr); sigstr = NULL;
+	
+	EVP_PKEY_free(DHkey);
+	EVP_PKEY_free(DHpeerKey);
+	EVP_PKEY_CTX_free(pctxDH);
+
+
+
+	/*CHECK RSA MSG*/
+	if(!reciveRSAsign(socket, pubKeyRSA, (unsigned char**) &buff))
+		return -1;
+
+	/*DERIVE AES IV*/
+	msgToDHpubKey(&DHpeerKey, buff, bufflen);
+	genKeyFromParamsDH(&pctxDH,&DHkey, DHpeerKey);
+	free(buff); buff = NULL;
+
+	*iv = deriveSharedSecretDH(DHkey, DHpeerKey);
+
+	/*SEND SIGNED PUBKEY DH*/
+	msglen = DHpubKeyToMsg(DHkey, &msg);
+
+	siglen = signMsgGS(grpkey, memkey, scheme, msg, &sigstr);
+	bufflen = sigMsgToStrGS(msg, msglen, sigstr, siglen, &buff);
+
+	escribir(socket, buff, bufflen);
+
+	free(buff); buff = NULL;
+	free(msg); msg = NULL;
+	free(sigstr); sigstr = NULL;
+	
+	EVP_PKEY_free(DHkey);
+	EVP_PKEY_free(DHpeerKey);
+	EVP_PKEY_CTX_free(pctxDH);
+
+
+	return 1;
+}
+
+
+int serverInitSConexion(int socket, EVP_PKEY* privKeyRSA , groupsig_key_t *grpkey, unsigned char** skey, unsigned char** iv){
+	EVP_PKEY* paramsDH = NULL, *DHkey = NULL, *DHpeerKey = NULL;
+	EVP_PKEY_CTX* pctxDH = NULL;
+	char* sigstr = NULL, *msg = NULL, *buff = NULL;
+	int siglen = 0, msglen = 0, bufflen = 0;
+
+	if(socket < 0 || privKeyRSA == NULL || grpkey == NULL || skey == NULL || iv == NULL){
+		return -1;
+	}
+	/*DH KEY PARAMS FOR AES KEY*/	
+	getParamsIniDH(&paramsDH);
+	genKeyFromParamsDH(&pctxDH, &DHkey, paramsDH);
+
+	/*SIGN RSA MSG*/
+	msglen = DHpubKeyToMsg(paramsDH, &msg);
+	sendRSAsign(socket, privKeyRSA, (const unsigned char*)msg, msglen);
+	free(msg);
+	msg = NULL;
+	msglen = 0;
+	bufflen = recibir(socket, &buff);
+	if(bufflen < 1)
+		return 0;
+
+	/*CHECK GS MSG*/
+	strToSigMsgGS(&msg, &msglen, &sigstr, &siglen, buff);
+	if(!verifySignGS(sigstr, grpkey, msg))
+		return 0;
+
+	/*DERIVE AES KEY*/
+	msgToDHpubKey(&DHpeerKey, msg, msglen);
+	*skey = deriveSharedSecretDH(DHkey, DHpeerKey);
+
+	free(msg); msg = NULL;
+	free(sigstr); sigstr = NULL;
+	free(buff); buff = NULL;
+
+	EVP_PKEY_free(paramsDH); paramsDH = NULL;
+	EVP_PKEY_free(DHkey); DHkey = NULL;
+	EVP_PKEY_free(DHpeerKey); DHpeerKey = NULL;
+	EVP_PKEY_CTX_free(pctxDH); pctxDH = NULL;
+
+
+
+	/*DH KEY PARAMS FOR AES KEY*/	
+	getParamsIniDH(&paramsDH);
+	genKeyFromParamsDH(&pctxDH, &DHkey, paramsDH);
+
+	/*SIGN RSA MSG*/
+	msglen = DHpubKeyToMsg(paramsDH, &msg);
+	sendRSAsign(socket, privKeyRSA, (const unsigned char*)msg, msglen);
+	free(msg);
+	msg = NULL;
+	msglen = 0;
+	bufflen = recibir(socket, &buff);
+	if(bufflen < 1)
+		return 0;
+
+	/*CHECK GS MSG*/
+	strToSigMsgGS(&msg, &msglen, &sigstr, &siglen, buff);
+	if(!verifySignGS(sigstr, grpkey, msg))
+		return 0;
+
+	/*DERIVE AES IV*/
+	msgToDHpubKey(&DHpeerKey, msg, msglen);
+	*iv = deriveSharedSecretDH(DHkey, DHpeerKey);
+
+	free(msg); msg = NULL;
+	free(sigstr); sigstr = NULL;
+	free(buff); buff = NULL;
+
+	EVP_PKEY_free(paramsDH); paramsDH = NULL;
+	EVP_PKEY_free(DHkey); DHkey = NULL;
+	EVP_PKEY_free(DHpeerKey); DHpeerKey = NULL;
+	EVP_PKEY_CTX_free(pctxDH); pctxDH = NULL;
+
+	return 1;
+
+}

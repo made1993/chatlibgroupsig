@@ -53,7 +53,7 @@ int main(int argc, char const **argv){
 		fprintf(stderr, "Error: invalid member key %s.\n", s_memkey);
 		return IERROR;
 	}
-	size = signMsgGS(grpkey, memkey, scheme,msgstr, &sigstr);
+	size = signMsgGS(grpkey, memkey, scheme, msgstr, &sigstr);
 	size = sigMsgToStrGS(msgstr, strlen(msgstr)+1, sigstr, size, &dest);
 	escribir(socketcli, dest, size);
 

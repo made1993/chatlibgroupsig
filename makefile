@@ -5,13 +5,20 @@ SSLLIBS= -lssl -lcrypto
 GSLIBS = -lgroupsig
 all: server cliente
 
-server: obj/usuario.o obj/conexion.o obj/comandos.o obj/parser.o obj/linkedList.o objS/comandoss.o src/server.c
-	@gcc $(FLAGS) -o server src/server.c obj/*.o objS/*.o -lpthread
+server: chatS src/server.c
+	@gcc $(FLAGS) -o server src/server.c obj/*.o objS/*.o -lpthread $(SSLLIBS) $(GSLIBS)
 
-cliente: obj/usuario.o obj/conexion.o obj/comandos.o obj/parser.o obj/linkedList.o objC/comandosu.o objC/clientui.o  src/cliente.c
-	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses
+cliente: chatC src/cliente.c
+	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses $(SSLLIBS) $(GSLIBS)
 
 # OBJETOS CHAT
+
+chatC: cripto obj/usuario.o obj/conexion.o objC/comandosu.o obj/parser.o obj/comandos.o obj/linkedList.o objC/clientui.o
+	@echo "compilado el chat"
+
+chatS: cripto obj/usuario.o obj/conexion.o objS/comandoss.o obj/parser.o obj/comandos.o obj/linkedList.o
+	@echo "compilado el chat"
+
 obj/usuario.o: src/usuario.c include/usuario.h
 	@gcc $(FLAGS) -c -o obj/usuario.o src/usuario.c
 
@@ -45,7 +52,7 @@ obj/funcionesDH.o: src/funcionesDH.c include/funcionesDH.h
 	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c 
 
 obj/funcionesAES.o: src/funcionesAES.c include/funcionesAES.h
-	@gcc $(FLAGS) -c -o obj/funcionesAES src/funcionesAES.c 
+	@gcc $(FLAGS) -c -o obj/funcionesAES.o src/funcionesAES.c 
 
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o include/funcionesRSA.h
 	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c $(SSLLIBS)
