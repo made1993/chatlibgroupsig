@@ -9,6 +9,8 @@
 
 extern LinkedList* listaUsuarios;
 
+extern EVP_CIPHER_CTX* ctx;
+extern groupsig_key_t *grpkey;
 /**
 *
 *	Funciones encargadas de los distintos comandos 

@@ -10,11 +10,14 @@ int sendNick(int socket, char* msg, int msglen){
 	if(strncmp(CNICK, msg, strlen(CNICK))!=0){
 		buff = malloc(sizeof(char) * (strlen(CNICK) + 2 + strlen(msg)));
 		sprintf(buff, "%s %s", CNICK, msg);
-		ret = escribir(socket, buff, msglen + strlen(CNICK) + 1);
+
+		ret = sendClientCiphMsg(socket, ctx, skey, iv, 
+			(const unsigned char*)buff, msglen + strlen(CNICK) + 1,
+			grpkey, memkey, scheme);
+		//ret = escribir(socket, buff, msglen + strlen(CNICK) + 1);
 		free(buff);
 		return ret;	
 	}
-
 	pch1 = strchr(msg, ' ');
 	if (pch1 == NULL){
 		printMsg("NICK ERROR");
@@ -33,7 +36,11 @@ int sendNick(int socket, char* msg, int msglen){
 	}
 	buff = malloc(strlen(CNICK) + 1 + nicklen );
 	sprintf(buff, "%s %s", CNICK, pch1);
-	ret = escribir(socket, buff, nicklen + strlen(CNICK) + 1);
+	
+	ret = sendClientCiphMsg(socket, ctx, skey, iv, 
+			(const unsigned char*)buff, nicklen + strlen(CNICK) + 1,
+			grpkey, memkey, scheme);
+	//ret = escribir(socket, buff, nicklen + strlen(CNICK) + 1);
 	free(buff);
 
 	return ret;
@@ -57,7 +64,10 @@ int sendMsg(int socket, char* msg, int msglen){
 	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
-	ret = escribir(socket, buff, bufflen);
+	ret = sendClientCiphMsg(socket, ctx, skey, iv, 
+			(const unsigned char*)buff, bufflen,
+			grpkey, memkey, scheme);
+	//ret = escribir(socket, buff, bufflen);
 	free(buff);
 	buff = NULL;
 	return ret;
@@ -66,15 +76,24 @@ int sendMsg(int socket, char* msg, int msglen){
 
 
 int sendDisconnect(int socket){
-	return escribir(socket, CDISCONNECT, strlen(CDISCONNECT)+1);
+	return sendClientCiphMsg(socket, ctx, skey, iv, 
+			(const unsigned char*)CDISCONNECT, strlen(CDISCONNECT)+1,
+			grpkey, memkey, scheme);
+	//return escribir(socket, CDISCONNECT, strlen(CDISCONNECT)+1);
 }
 
 int sendPing(int socket){
-	return escribir(socket, CPING, strlen(CPING)+1);
+	return sendClientCiphMsg(socket, ctx, skey, iv, 
+			(const unsigned char*)CPING, strlen(CPING)+1,
+			grpkey, memkey, scheme);
+	//return escribir(socket, CPING, strlen(CPING)+1);
 }
 
 int sendPong(int socket){
-	return escribir(socket, CPONG, strlen(CPONG)+1);
+	return sendClientCiphMsg(socket, ctx, skey, iv, 
+			(const unsigned char*)CPONG, strlen(CPONG)+1,
+			grpkey, memkey, scheme);
+	//return escribir(socket, CPONG, strlen(CPONG)+1);
 }
 
 int recvNick(char* msg){

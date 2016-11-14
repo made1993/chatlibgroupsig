@@ -81,7 +81,6 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 	if (!ctx){
 		return NULL;
 	}
-	
 	if(EVP_PKEY_derive_init(ctx) <= 0){
 		EVP_PKEY_CTX_free(ctx);
 		return NULL;
@@ -110,6 +109,7 @@ unsigned  char* deriveSharedSecretDH(EVP_PKEY* privkey, EVP_PKEY* peerkey){
 		EVP_PKEY_CTX_free(ctx);
 		return NULL;
 	}
+
 	return skey;
 }
 

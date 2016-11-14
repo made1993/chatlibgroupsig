@@ -141,22 +141,23 @@ int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, unsigned char** msg){
 	if(sockfd <1 || pubKey == NULL || msg == NULL)
 		return 0;
 	msglen = recibir(sockfd, &buff);
-
 	if(msglen == -1)
 		return 0;	
 	sig = malloc(sizeof(char) * SHA256_SIGLEN);
 	auxMsg =  malloc(sizeof(char) * (msglen - SHA256_SIGLEN));
 
-	if(*msg == NULL || sig == NULL)
+	if(auxMsg == NULL || sig == NULL){
 		return 0;
+	}
 	
 	memcpy(sig, buff, sizeof(char) * SHA256_SIGLEN);
 	memcpy(auxMsg, &buff[SHA256_SIGLEN], msglen - SHA256_SIGLEN);
 	
 	*msg = auxMsg;
-
-	return verifySignRSA(pubKey, (const unsigned char*)sig, 
-						(const unsigned char*) auxMsg,  SHA256_SIGLEN, msglen - SHA256_SIGLEN);
+	if( !verifySignRSA(pubKey, (const unsigned char*)sig, 
+						(const unsigned char*) auxMsg,  SHA256_SIGLEN, msglen - SHA256_SIGLEN))
+		return 0;
+	return msglen - SHA256_SIGLEN;
 }
 
 
@@ -176,7 +177,6 @@ int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msg
 	buff = realloc(buff, sizeof(char) * (msglen + slen));
 
 	memcpy(&buff[slen], msg, msglen);
-	
 	if(-1 == escribir(sockfd, (char*)buff, slen + msglen)){
 		return 0;
 	}

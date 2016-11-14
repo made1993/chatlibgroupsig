@@ -15,6 +15,8 @@ typedef struct USUARIO
 	int pingt;
 	char* nick;
 	int* socket;
+	unsigned char* key;
+	unsigned char* iv;
 }Usuario_t;
 
 
@@ -28,6 +30,13 @@ char* getNick(Usuario_t* usr);
 
 int setId(Usuario_t* usr, int id);
 int getId(Usuario_t* usr);
+
+
+int setKey(Usuario_t* usr, char** key);
+char* getKey(Usuario_t* usr);
+
+int setIv(Usuario_t* usr, char** iv);
+char* getIv(Usuario_t* usr);
 
 int setCurrentPingt(Usuario_t* usr);
 int getPingt(Usuario_t* usr);

@@ -23,6 +23,8 @@ int liberarUsuario(Usuario_t* usr){
 		free(usr->nick);
 	if(!(usr->socket == NULL))
 		free(usr->socket);
+	free(usr->key);
+	free(usr->iv);
 	free(usr);
 	return 0; 
 }
@@ -76,6 +78,35 @@ int getPingt(Usuario_t* usr){
 	if(usr == NULL)
 		return -1;
 	return usr->pingt;
+}
+
+
+int setKey(Usuario_t* usr, char** key){
+	if(usr == NULL || key == NULL || *key == NULL)
+		return 0;
+
+	usr->key = (unsigned char*)*key;
+	return 1;
+}
+char* getKey(Usuario_t* usr){
+	if(usr == NULL)
+		return NULL;
+
+	return (char*)usr->key;
+}
+
+int setIv(Usuario_t* usr, char** iv){
+	if(usr == NULL || iv == NULL || *iv == NULL)
+		return 0;
+
+	usr->iv = (unsigned char*)*iv;
+	return 1;
+}
+char* getIv(Usuario_t* usr){
+	if(usr == NULL)
+		return NULL;
+
+	return (char*)usr->iv;
 }
 
 

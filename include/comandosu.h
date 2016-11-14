@@ -8,6 +8,10 @@
 #include "parser.h"
 
 extern char* nick;
+extern int scheme; 
+extern unsigned char* skey, *iv;
+extern EVP_CIPHER_CTX* ctx;
+extern groupsig_key_t *grpkey, *memkey;
 
 int sendNick(int socket, char* nick, int nicklen);
 int sendMsg(int socket, char* str, int msglen);
