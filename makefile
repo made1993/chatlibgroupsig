@@ -58,7 +58,7 @@ obj/funcionesAES.o: src/funcionesAES.c include/funcionesAES.h
 	@gcc $(FLAGS) -c -o obj/funcionesAES.o src/funcionesAES.c 
 
 obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o include/funcionesRSA.h
-	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c $(SSLLIBS)
+	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
 
 obj/funcionesGS.o: src/funcionesGS.c include/funcionesGS.h
 	@gcc $(FLAGS) -c -o obj/funcionesGS.o src/funcionesGS.c 
@@ -77,8 +77,8 @@ testAES: test/AES.c obj/funcionesAES.o
 	@gcc $(FLAGS) -o TestAES test/AES.c obj/funcionesAES.o $(SSLLIBS)
 
 testGS: test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
-	@gcc $(FLAGS) -o TestServerGS test/serverGS.c obj/* $(GSLIBS)
-	@gcc $(FLAGS) -o TestClientGS test/clientGS.c obj/* $(GSLIBS)
+	@gcc $(FLAGS) -o TestServerGS test/serverGS.c obj/* $(GSLIBS) $(SSLLIBS)
+	@gcc $(FLAGS) -o TestClientGS test/clientGS.c obj/* $(GSLIBS) $(SSLLIBS)
 
 
 #GENERAR CLAVES

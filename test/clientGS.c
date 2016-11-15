@@ -64,8 +64,13 @@ int main(int argc, char const **argv){
 
 	printf("Esperando firma.\n");
 	msglen = recibir(sockfd, &buff);
+	BIO_dump_fp(stdout, (const char*) buff, msglen);
+	printf("msglen:%d\n", msglen);
 
-	strToSigMsgGS(&msgstr, &msglen, &sigstr, &siglen, buff);
+	strToSigMsgGS(&msgstr, &msglen, &sigstr, &siglen, buff, msglen);
+	printf("msglen:%d\n", msglen);
+	printf("siglen:%d\n", siglen);
+
 	printf("%d\n",  verifySignGS(sigstr, grpkey, msgstr));
 	
 	close(sockfd);

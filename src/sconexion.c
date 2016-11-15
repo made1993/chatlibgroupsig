@@ -50,12 +50,16 @@ int freeSconexion(Sconexion_t* scnx){
 int sendClientCiphMsg(Sconexion_t* scnx,const unsigned char* text, int textlen){
 	int msglen = 0, bufflen = 0, siglen = 0;
 	char*  msg = NULL, *buff = NULL, *sigstr;
+	FILE* f = NULL;
 	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || scnx->iv == NULL ||
 	 text == NULL || textlen < 1 || scnx->grpkey == NULL || scnx->memkey == NULL)
 		return 0;
+	f = fopen("csend.txt", "a");
 
 
 	siglen = signMsgGS(scnx->grpkey, scnx->memkey, scnx->scheme, (char*)text, &sigstr);
+	fprintf(f, "%d\t%d:%s\n", textlen, siglen, text);
+	fclose(f);
 	msglen = sigMsgToStrGS((char*)text, textlen, sigstr, siglen, &msg);
 
 	bufflen = encrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)msg, (unsigned char**)&buff, msglen);
@@ -76,18 +80,21 @@ int sendClientCiphMsg(Sconexion_t* scnx,const unsigned char* text, int textlen){
 int reciveServerCiphMsg(Sconexion_t* scnx, char** msg){
 	int msglen = 0, bufflen = 0, siglen = 0;
 	char* buff = NULL, *text =  NULL, *sigstr =  NULL;
-	printf("1\n");
+	FILE * f = NULL;
 	
 	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || scnx->iv == NULL	||
 	 scnx->grpkey == NULL || msg == NULL)
 		return 0;
-	printf("2\n");
 	bufflen = recibir(scnx->socket, &buff);
-	printf("3: %d\n",  bufflen);
 
+	printf("3\n");
 	msglen = decrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)buff, (unsigned char**)&text, bufflen);
-	printf("3.5: %d\n", msglen);
-	strToSigMsgGS(msg, &msglen, &sigstr, &siglen, text, msglen);
+	if(!strToSigMsgGS(msg, &msglen, &sigstr, &siglen, text, msglen))
+		return 0;
+
+	f = fopen("srecv.txt", "a");
+	fprintf(f, "%d\t%d:%s\n", msglen, siglen, *msg);
+	fclose(f);
 	printf("4\n");
 	if(!verifySignGS(sigstr, scnx->grpkey, *msg))
 		return 0;

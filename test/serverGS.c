@@ -16,13 +16,13 @@ int main(int argc, char const **argv){
 	struct sockaddr_in ip4addr;
 	int socketcli;	
 
-	sockfd = abrirSocketTCP();
-	abrirBind(sockfd, 8080);
-	abrirListen(sockfd);
-	printf("ESPERANDO CLIENTE\n");
-	socketcli=aceptar(sockfd, ip4addr);
+	//sockfd = abrirSocketTCP();
+	//abrirBind(sockfd, 8080);
+	//abrirListen(sockfd);
+	//printf("ESPERANDO CLIENTE\n");
+	//socketcli=aceptar(sockfd, ip4addr);
 
-	if((groupsig_get_code_from_str(&scheme, "KTY04")) == IERROR) {
+	if((groupsig_get_code_from_str(&scheme, "CPY06")) == IERROR) {
 		fprintf(stderr, "Error: Wrong scheme\n");
 		return IERROR;
 	}
@@ -53,11 +53,23 @@ int main(int argc, char const **argv){
 		fprintf(stderr, "Error: invalid member key %s.\n", s_memkey);
 		return IERROR;
 	}
-	size = signMsgGS(grpkey, memkey, scheme, msgstr, &sigstr);
-	size = sigMsgToStrGS(msgstr, strlen(msgstr)+1, sigstr, size, &dest);
-	escribir(socketcli, dest, size);
+	int siglen = 0, msglen = 0, res = 0, i = 0;
+	char* signture, *message;
+	do{
+		printf("1\n");
+		size = signMsgGS(grpkey, memkey, scheme, msgstr, &sigstr);
+		printf("2: %d\n", size);
+		//res = verifySignGS(sigstr, grpkey, msgstr);
+		//printf("res: %d\t", res);
+		size = sigMsgToStrGS(msgstr, strlen(msgstr)+1, sigstr, size, &dest);
+		//escribir(socketcli, dest, size);
+		printf("3\n");
+		strToSigMsgGS(&message, &msglen, &signture, &siglen, dest, size);
+		res = verifySignGS(signture, grpkey, message);
+		printf("i: %d\tres: %d\n", i++, res);
+	}while(verifySignGS(sigstr, grpkey, msgstr));
 
-	close(socketcli);
-	close(sockfd);
+	//close(socketcli);
+	//close(sockfd);
 	return 0;
 }
