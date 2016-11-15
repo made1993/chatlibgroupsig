@@ -3,21 +3,17 @@
 
 
 int sendPing(Usuario_t* usr){
-	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket == -1)
+	if(usr==NULL || usr->scnx == NULL)
 		return -1;
 
-	return sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)CPING, strlen(CPING)+1);
+	return sendServerCiphMsg(usr->scnx, (const unsigned char*)CPING, strlen(CPING)+1);
 	//return escribir(*usr->socket, CPING, strlen(CPING)+1);
 
 }
 int sendPong(Usuario_t* usr){
-	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket == -1)
+	if(usr==NULL || usr->scnx == NULL)
 		return -1;
-	return sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)CPONG, strlen(CPONG)+1);
+	return sendServerCiphMsg(usr->scnx, (const unsigned char*)CPONG, strlen(CPONG)+1);
 	//return escribir(*usr->socket, CPONG, strlen(CPONG)+1);
 
 }
@@ -27,8 +23,7 @@ int sendMsg(Usuario_t* usr, char* msg, int msglen){
 	char* buff= NULL; 
 	int ret = 0;
 	char* nick= usr->nick;
-	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket == -1)
+	if(usr==NULL || usr->scnx == NULL)
 		return -1;
 	if(nick == NULL || strlen(nick) > NICK_MAX_LEN || msg == NULL)
 		return -1;
@@ -39,8 +34,7 @@ int sendMsg(Usuario_t* usr, char* msg, int msglen){
 	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
-	ret = sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)buff, msglen);
+	ret = sendServerCiphMsg(usr->scnx, (const unsigned char*)buff, msglen);
 	//ret = escribir(*usr->socket, buff, msglen);
 	free(buff);
 	return ret;	
@@ -56,11 +50,9 @@ int sendNick(Usuario_t* usr, char* nick){
 	return 0;
 }
 int sendDisconnect(Usuario_t* usr){
-	if(usr==NULL || usr->socket == NULL
-		|| *usr->socket == -1)
+	if(usr==NULL || usr->scnx == NULL)
 		return -1;
-	sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)CDISCONNECT, strlen(CDISCONNECT)+1);
+	sendServerCiphMsg(usr->scnx, (const unsigned char*)CDISCONNECT, strlen(CDISCONNECT)+1);
 	//escribir(*usr->socket, CDISCONNECT, strlen(CDISCONNECT)+1);
 	delete_elem_list(listaUsuarios, (void*) usr);
 	liberarUsuario(usr);
@@ -101,16 +93,15 @@ int recvDisconnect(Usuario_t* usr){
 }
 
 int recvPing(Usuario_t* usr){
-	if(usr == NULL || usr->socket == NULL)
+	if(usr == NULL || usr->scnx == NULL)
 		return -1;
 
-	return sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)CPONG, strlen(CPONG)+1);
+	return sendServerCiphMsg(usr->scnx, (const unsigned char*)CPONG, strlen(CPONG)+1);
 	//return escribir(*usr->socket, CPONG, strlen(CPONG)+1);
 }
 
 int recvPong(Usuario_t* usr){
-	if(usr == NULL || usr->socket == NULL)
+	if(usr == NULL || usr->scnx == NULL)
 		return -1;
 	printf("se recibe pong\n");
 	setCurrentPingt(usr);
@@ -126,9 +117,8 @@ int broadcastMsg(char * msg, int msglen){
 	nd = listaUsuarios->first;
 	while (nd != NULL){
 		usr = (Usuario_t*) nd->data;
-		if(usr->socket != NULL && *usr->socket != -1)
-			sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)msg, msglen);
+		if(usr->scnx != NULL)
+			sendServerCiphMsg(usr->scnx, (const unsigned char*)msg, msglen);
 			//escribir(*(usr->socket), msg, msglen);
 		nd= nd->next;
 	}

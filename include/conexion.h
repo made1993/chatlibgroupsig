@@ -11,10 +11,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <inttypes.h>
-#include "funcionesRSA.h"
-#include "funcionesGS.h"
-#include "funcionesDH.h"
-#include "funcionesAES.h"
 
 #define MAX_MSG_LEN 8096
 #define LAST_MSG 0
@@ -38,23 +34,4 @@ int escribir(int sockfd,char *msg, int mlen);
 char* atoIp(char* str);
 uint8_t obtenerIPInterface(char * interface, uint8_t* retorno);
 
-int sendClientCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
-						const unsigned char* text, int textlen, groupsig_key_t *grpkey, 
-						groupsig_key_t *memkey,	int scheme);
-
-int reciveServerCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
-						groupsig_key_t *grpkey, char** msg);
-
-
-int sendServerCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
-						const unsigned char* text, int textlen);
-
-int reciveClientCiphMsg(int socket, EVP_CIPHER_CTX* ctx, unsigned char* key, unsigned char* iv, 
-						char** msg);
-
-int clientInitSConexion(int socket, EVP_PKEY* pubKeyRSA , groupsig_key_t *grpkey, groupsig_key_t *memkey,
-						int scheme, unsigned char** skey, unsigned char** iv);
-
-int serverInitSConexion(int socket, EVP_PKEY* privKeyRSA , groupsig_key_t *grpkey, unsigned char** skey,
-						unsigned char** iv);
 #endif

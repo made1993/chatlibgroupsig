@@ -1,9 +1,9 @@
 #include "../include/comandosu.h"
 
-int sendNick(int socket, char* msg, int msglen){
+int sendNick(Sconexion_t * scnx, char* msg, int msglen){
 	char* buff= NULL, *pch1 =  NULL, *pch2 =  NULL;
 	int ret = 0, nicklen = 0;
-	if(socket == -1 || msg == NULL || msglen < 1){
+	if(scnx == NULL || msg == NULL || msglen < 1){
 		printMsg("NICK ERROR");
 		return -1;
 	}
@@ -11,9 +11,7 @@ int sendNick(int socket, char* msg, int msglen){
 		buff = malloc(sizeof(char) * (strlen(CNICK) + 2 + strlen(msg)));
 		sprintf(buff, "%s %s", CNICK, msg);
 
-		ret = sendClientCiphMsg(socket, ctx, skey, iv, 
-			(const unsigned char*)buff, msglen + strlen(CNICK) + 1,
-			grpkey, memkey, scheme);
+		ret = sendClientCiphMsg(scnx, (const unsigned char*)buff, msglen + strlen(CNICK) + 1);
 		//ret = escribir(socket, buff, msglen + strlen(CNICK) + 1);
 		free(buff);
 		return ret;	
@@ -37,19 +35,17 @@ int sendNick(int socket, char* msg, int msglen){
 	buff = malloc(strlen(CNICK) + 1 + nicklen );
 	sprintf(buff, "%s %s", CNICK, pch1);
 	
-	ret = sendClientCiphMsg(socket, ctx, skey, iv, 
-			(const unsigned char*)buff, nicklen + strlen(CNICK) + 1,
-			grpkey, memkey, scheme);
+	ret = sendClientCiphMsg(scnx, (const unsigned char*)buff, nicklen + strlen(CNICK) + 1);
 	//ret = escribir(socket, buff, nicklen + strlen(CNICK) + 1);
 	free(buff);
 
 	return ret;
 }
 
-int sendMsg(int socket, char* msg, int msglen){
+int sendMsg(Sconexion_t* scnx, char* msg, int msglen){
 	char* buff= NULL; 
 	int ret = 0, bufflen = 0;
-	if(socket == -1){
+	if(scnx == NULL){
 		printMsg("MSG ERROR");
 		return -1;
 	}
@@ -64,9 +60,7 @@ int sendMsg(int socket, char* msg, int msglen){
 	buff= strcat(buff, nick);
 	buff= strcat(buff, " ");
 	buff= strcat(buff, msg);
-	ret = sendClientCiphMsg(socket, ctx, skey, iv, 
-			(const unsigned char*)buff, bufflen,
-			grpkey, memkey, scheme);
+	ret = sendClientCiphMsg(scnx, (const unsigned char*)buff, bufflen);
 	//ret = escribir(socket, buff, bufflen);
 	free(buff);
 	buff = NULL;
@@ -75,24 +69,24 @@ int sendMsg(int socket, char* msg, int msglen){
 }
 
 
-int sendDisconnect(int socket){
-	return sendClientCiphMsg(socket, ctx, skey, iv, 
-			(const unsigned char*)CDISCONNECT, strlen(CDISCONNECT)+1,
-			grpkey, memkey, scheme);
+int sendDisconnect(Sconexion_t* scnx){
+	if(scnx == NULL)
+		return 0;
+	return sendClientCiphMsg(scnx, (const unsigned char*)CDISCONNECT, strlen(CDISCONNECT)+1);
 	//return escribir(socket, CDISCONNECT, strlen(CDISCONNECT)+1);
 }
 
-int sendPing(int socket){
-	return sendClientCiphMsg(socket, ctx, skey, iv, 
-			(const unsigned char*)CPING, strlen(CPING)+1,
-			grpkey, memkey, scheme);
+int sendPing(Sconexion_t* scnx){
+	if(scnx == NULL)
+		return 0;
+	return sendClientCiphMsg(scnx,(const unsigned char*)CPING, strlen(CPING)+1);
 	//return escribir(socket, CPING, strlen(CPING)+1);
 }
 
-int sendPong(int socket){
-	return sendClientCiphMsg(socket, ctx, skey, iv, 
-			(const unsigned char*)CPONG, strlen(CPONG)+1,
-			grpkey, memkey, scheme);
+int sendPong(Sconexion_t* scnx){
+	if(scnx == NULL)
+		return 0;
+	return sendClientCiphMsg(scnx,(const unsigned char*)CPONG, strlen(CPONG)+1);
 	//return escribir(socket, CPONG, strlen(CPONG)+1);
 }
 
@@ -135,12 +129,12 @@ int recvMsg(char* msg){
 	return 0;
 }
 
-int recvPing(int socket){
-	if(socket == -1){
+int recvPing(Sconexion_t* scnx){
+	if(scnx == NULL){
 		printMsg("PING ERROR");
 		return -1;
 	}
-	return sendPong(socket);
+	return sendPong(scnx);
 }
 int recvPong(){
 	

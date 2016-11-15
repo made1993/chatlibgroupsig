@@ -14,19 +14,15 @@
 #include "../include/comandosu.h"
 #include "../include/clientui.h" 
 
-int sockfd = -1;
 pthread_t h1, h2;
 char* nick;
 
-int scheme = 0; 
-unsigned char* skey, *iv;
-EVP_CIPHER_CTX* ctx;
-groupsig_key_t *grpkey = NULL, *memkey = NULL;
+Sconexion_t* scnx = NULL;
 
 void* hiloEscritura(void* args){
 	char* msg = NULL;
 	int end = 0;
-	if(sockfd ==-1)
+	if(scnx == NULL)
 		return NULL;
 	while (!end){
 
@@ -38,19 +34,19 @@ void* hiloEscritura(void* args){
 		}
 		switch(comando(msg)){
 			case NICK:
-				sendNick(sockfd, msg, strlen(msg)+1);
+				sendNick(scnx, msg, strlen(msg)+1);
 			break;
 			case MSG2:
-				sendMsg(sockfd, msg, strlen(msg)+1);
+				sendMsg(scnx, msg, strlen(msg)+1);
 			break;
 			case DISCONNECT:
-				end = sendDisconnect(sockfd);
+				end = sendDisconnect(scnx);
 			break;
 			case PING:
-				sendPing(sockfd);
+				sendPing(scnx);
 			break;
 			case PONG:
-				sendPong(sockfd);
+				sendPong(scnx);
 			break;
 
 			default:
@@ -68,10 +64,10 @@ void* hiloEscritura(void* args){
 void* hiloLectura(void* args){
 	char* msg = NULL;
 	int end = 0, ret = 0;
-	if(sockfd ==-1)
+	if(scnx == NULL)
 		return NULL;
 	while(!end){
-		if((ret = reciveClientCiphMsg(sockfd, ctx, (unsigned char*)skey, (unsigned char*)iv, &msg)) <1)
+		if((ret = reciveClientCiphMsg(scnx, &msg)) <1)
 			break;
 		
 		switch(comando(msg)){
@@ -86,7 +82,7 @@ void* hiloLectura(void* args){
 				end = 1;
 			break;
 			case PING:
-				recvPing(sockfd);
+				recvPing(scnx);
 			break;
 			case PONG:
 				recvPong();
@@ -98,7 +94,7 @@ void* hiloLectura(void* args){
 }
 
 int identificacion(char* nick){
-	return sendNick(sockfd, nick, strlen(nick)+1);
+	return sendNick(scnx, nick, strlen(nick)+1);
 }
 
 int main(int argc , char *argv[]){
@@ -107,7 +103,10 @@ int main(int argc , char *argv[]){
 	int long_index=0;
 	char * ip = NULL;
 	char * port = NULL;
+	int sockfd = -1;
 
+	int scheme = 0; 
+	groupsig_key_t *grpkey = NULL, *memkey = NULL;
 	EVP_PKEY* pubKeyRSA = NULL;
 	
 	
@@ -217,14 +216,15 @@ int main(int argc , char *argv[]){
 		fprintf(stderr, "Error: invalid member key %s.\n", s_memkey);
 		return IERROR;
 	}
-	if(!clientInitSConexion(sockfd, pubKeyRSA , grpkey, memkey,
-						scheme, &skey, &iv))
+
+	scnx = initSconexion(sockfd, grpkey, memkey, scheme, pubKeyRSA);
+
+	if(scnx == NULL || !clientInitSConexion(scnx))
 		return 0;
 	
 
 	/*Conexion chat*/
 	
-	ctx = create_ctx();
 	identificacion(nick);
 	/*Creacion de los hilos*/
 	//pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );

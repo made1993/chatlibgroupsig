@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "sconexion.h"
 
 #define NICK_MAX_LEN 8
 
@@ -14,13 +15,13 @@ typedef struct USUARIO
 	int id;
 	int pingt;
 	char* nick;
-	int* socket;
-	unsigned char* key;
-	unsigned char* iv;
+	Sconexion_t * scnx;
 }Usuario_t;
 
 
-Usuario_t* crearUsuario(int* socket);
+Usuario_t* crearUsuario();
+int initUser(Usuario_t* usr, int socket, groupsig_key_t *grpkey, groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA);
+
 int liberarUsuario(Usuario_t* usr);
 
 int setNick(Usuario_t* usr, char* nick);

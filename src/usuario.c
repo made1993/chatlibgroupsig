@@ -2,18 +2,23 @@
 
 int nUsr = 0;
 
-Usuario_t* crearUsuario(int* socket){
+Usuario_t* crearUsuario(){
 	Usuario_t* usr = NULL;
-
-	if (socket == NULL || *socket <= 0)
-		return NULL;
+	
 	usr = malloc(sizeof(Usuario_t));
 	usr->id = nUsr++;
 	usr->nick = malloc(NICK_MAX_LEN + 1);
-	usr->socket = malloc(sizeof(int));
-	*usr->socket = *socket;
 	setCurrentPingt(usr);
 	return usr;
+}
+
+int initUser(Usuario_t* usr, int socket, groupsig_key_t *grpkey, groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA){
+	if(usr == NULL)
+		return 0;
+	usr->scnx = initSconexion(socket, grpkey, memkey, scheme, keyRSA);
+	if(usr->scnx ==  NULL)
+		return 0;
+	return 1;
 }
 
 int liberarUsuario(Usuario_t* usr){
@@ -21,11 +26,8 @@ int liberarUsuario(Usuario_t* usr){
 		return 1;
 	if(!(usr->nick == NULL))
 		free(usr->nick);
-	if(!(usr->socket == NULL))
-		free(usr->socket);
-	free(usr->key);
-	free(usr->iv);
-	free(usr);
+	freeSconexion(usr->scnx); 
+	free(usr->scnx); usr->scnx = NULL;
 	return 0; 
 }
 
@@ -82,31 +84,31 @@ int getPingt(Usuario_t* usr){
 
 
 int setKey(Usuario_t* usr, char** key){
-	if(usr == NULL || key == NULL || *key == NULL)
+	if(usr == NULL || key == NULL || *key == NULL || usr->scnx == NULL)
 		return 0;
 
-	usr->key = (unsigned char*)*key;
+	usr->scnx->key = (unsigned char*)*key;
 	return 1;
 }
 char* getKey(Usuario_t* usr){
 	if(usr == NULL)
 		return NULL;
 
-	return (char*)usr->key;
+	return (char*)usr->scnx->key;
 }
 
 int setIv(Usuario_t* usr, char** iv){
-	if(usr == NULL || iv == NULL || *iv == NULL)
+	if(usr == NULL || iv == NULL || *iv == NULL || usr->scnx == NULL)
 		return 0;
 
-	usr->iv = (unsigned char*)*iv;
+	usr->scnx->iv = (unsigned char*)*iv;
 	return 1;
 }
 char* getIv(Usuario_t* usr){
 	if(usr == NULL)
 		return NULL;
 
-	return (char*)usr->iv;
+	return (char*)usr->scnx->iv;
 }
 
 

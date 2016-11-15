@@ -13,27 +13,31 @@
 pthread_t* hilos;
 
 LinkedList* listaUsuarios;
-EVP_CIPHER_CTX* ctx;
-groupsig_key_t *grpkey;
+
 void* verificarCliente(void* args){
 	int* socket = NULL;
 	char * buff = NULL;
 	int bufflen, scheme = 0;
 	int key_format = -1;
 
+	groupsig_key_t *grpkey;
 	EVP_PKEY* privKeyRSA = NULL;
 
 	char s_grpkey[] = ".fg/group/grp.key";
 	char s_rsaPrivKey[] = "privkey.pem";
-	char* skey, *iv;
 
 	socket = (int*) args;
 	Usuario_t* usr = NULL;
-	usr = crearUsuario(socket);
+	usr = crearUsuario();
+	if(usr == NULL)
+		return NULL;
 
 	RSAfileToPrivKey(&privKeyRSA, s_rsaPrivKey);
-	if(privKeyRSA == NULL)
-		return 0;
+	if(privKeyRSA == NULL){
+		liberarUsuario(usr);
+		free(usr);
+		return NULL;
+	}
 	switch(scheme) {
 	case GROUPSIG_KTY04_CODE:
 		key_format = GROUPSIG_KEY_FORMAT_FILE_NULL_B64;
@@ -46,6 +50,8 @@ void* verificarCliente(void* args){
 		break;
 	default:
 		fprintf(stderr, "Error: unknown scheme.\n");
+		liberarUsuario(usr);
+		free(usr);
 		return NULL;
 	}
 
@@ -53,33 +59,41 @@ void* verificarCliente(void* args){
 
 	if(!(grpkey = groupsig_grp_key_import(scheme, key_format, s_grpkey))) {
 		fprintf(stderr, "Error: invalid group key %s.\n", s_grpkey);
+		liberarUsuario(usr);
+		free(usr);
 		return NULL;
 	}
-	serverInitSConexion(*socket, privKeyRSA , grpkey, (unsigned char**)&skey, (unsigned char**)&iv);
-
-	setKey(usr, &skey);
-	setIv(usr, &iv);
-	ctx = create_ctx();
+	if(!initUser(usr, *socket, grpkey, NULL, scheme, privKeyRSA)){
+		liberarUsuario(usr);
+		free(usr);
+		return NULL;
+	}
+	if(!serverInitSConexion(usr->scnx)){
+		liberarUsuario(usr);
+		free(usr);
+		return NULL;
+	}
 	while(1){
 
-		bufflen = reciveServerCiphMsg(*socket, ctx, usr->key, usr->iv, grpkey, &buff);
+		bufflen = reciveServerCiphMsg(usr->scnx, &buff);
 		if(bufflen < 1){
-		//if(recibir(*socket, &buff) == -1){
-			close(*socket);
+			delete_elem_list(listaUsuarios, (void*) usr);
+			liberarUsuario(usr);
+			free(usr);
 			return NULL;
 		}
-		printf("%d\n", bufflen);
+
 		if(comando(buff)== NICK){
 			recvNick(usr, buff);
 			printf("Se registro %s\n", usr->nick);
-			sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)"/MSG server bienvenido", strlen((char*)"/MSG server bienvenido")+1);
+			sendServerCiphMsg(usr->scnx, (const unsigned char*)"/MSG server bienvenido",
+								 strlen((char*)"/MSG server bienvenido")+1);
 			//escribir(*usr->socket, "/MSG server bienvenido", strlen((char*)"/MSG server bienvenido")+1);
 			break;
 		}
 		else{
-			sendServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, 
-			 	(const unsigned char*)CDISCONNECT, strlen((char*)CDISCONNECT)+1);
+			sendServerCiphMsg(usr->scnx, (const unsigned char*)CDISCONNECT,
+							 strlen((char*)CDISCONNECT)+1);
 			//escribir(*usr->socket, CDISCONNECT, strlen((char*)CDISCONNECT)+1);
 
 		}
@@ -117,13 +131,17 @@ void* lecturaUsuario(void* args){
 	char * buff = NULL;
 	int bufflen, end = 0;
 	Usuario_t* usr = verificarCliente(args);
-	if(usr == NULL)
+	if(usr == NULL){
+		printf("ERR: fallo al verificar cliente\n");
 		return NULL;
+	}
 	while(!end){
-		bufflen = reciveServerCiphMsg(*usr->socket, ctx, usr->key, usr->iv, grpkey, &buff);
+		bufflen = reciveServerCiphMsg(usr->scnx, &buff);
 		if(bufflen  < 1){
 			printf( "%d\n", delete_elem_list(listaUsuarios, (void*) usr));
 			liberarUsuario(usr);
+			free(usr);
+			end = 1;
 			printf("cosas extrañas pueden pasar\n");
 			break;
 		}
@@ -192,14 +210,14 @@ int main(){
 	pthread_create(&hiloPing,NULL, controlDeConexion, NULL );
 
 	while(1){
-		socketcli= malloc(sizeof(int));
-		*socketcli=aceptar(socket, ip4addr);
+		socketcli = malloc(sizeof(int));
+		*socketcli = aceptar(socket, ip4addr);
 
 		printf("nuevo cliente\n");
 		usuarios++;
 		hilos= realloc(hilos, sizeof(pthread_t)*usuarios);
 
-		pthread_create(&hilos[usuarios-1],NULL, lecturaUsuario, (void*) socketcli );
+		pthread_create(&hilos[usuarios-1],NULL, lecturaUsuario, (void*) socketcli);
 		
 	}
 	printf("fin\n");

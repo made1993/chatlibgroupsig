@@ -45,8 +45,11 @@ objC/clientui.o: src/clientui.c include/linkedList.h
 
 #PROTOCOLOS CRIPTOGRAFICOS
 
-cripto: obj/funcionesDH.o obj/funcionesAES.o obj/funcionesRSA.o obj/funcionesGS.o
+cripto: obj/funcionesDH.o obj/funcionesAES.o obj/funcionesRSA.o obj/funcionesGS.o obj/sconexion.o
 	@echo "compilados los protocolos criptograficos"
+
+obj/sconexion.o: src/sconexion.c include/sconexion.h
+	@gcc $(FLAGS) -c -o obj/sconexion.o src/sconexion.c 
 
 obj/funcionesDH.o: src/funcionesDH.c include/funcionesDH.h
 	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c 
@@ -70,8 +73,8 @@ testDH: test/serverDH.c test/clientDH.c obj/funcionesDH.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerDH test/serverDH.c obj/* $(SSLLIBS)
 	@gcc $(FLAGS) -o TestClientDH test/clientDH.c obj/* $(SSLLIBS)
 
-testAES: test/AES.c obj/funcionesAES.o obj/conexion.o
-	@gcc $(FLAGS) -o TestAES test/AES.c obj/* $(SSLLIBS)
+testAES: test/AES.c obj/funcionesAES.o
+	@gcc $(FLAGS) -o TestAES test/AES.c obj/funcionesAES.o $(SSLLIBS)
 
 testGS: test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerGS test/serverGS.c obj/* $(GSLIBS)

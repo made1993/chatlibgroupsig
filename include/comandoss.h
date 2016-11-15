@@ -1,7 +1,6 @@
 #ifndef COMANDOSS_H
 #define COMANDOSS_H
 
-#include "conexion.h"
 #include "comandos.h"
 #include "usuario.h"
 #include "linkedList.h"
