@@ -71,7 +71,7 @@ int main(int argc, char const **argv){
 	printf("msglen:%d\n", msglen);
 	printf("siglen:%d\n", siglen);
 
-	printf("%d\n",  verifySignGS(sigstr, grpkey, msgstr));
+	printf("%d\n",  verifySignGS(sigstr, grpkey, msgstr, scheme));
 	
 	close(sockfd);
 	return 0;
