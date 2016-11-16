@@ -20,7 +20,7 @@ int main(int argc, char const **argv){
 	int key_format = -1;
 
 
-	if((groupsig_get_code_from_str(&scheme, "KTY04")) == IERROR) {
+	if((groupsig_get_code_from_str(&scheme, "CPY06")) == IERROR) {
 		fprintf(stderr, "Error: Wrong scheme\n");
 		return IERROR;
 	}
@@ -72,6 +72,7 @@ int main(int argc, char const **argv){
 	printf("siglen:%d\n", siglen);
 
 	printf("%d\n",  verifySignGS(sigstr, grpkey, msgstr, scheme));
+	printf("%s\n", msgstr);
 	
 	close(sockfd);
 	return 0;

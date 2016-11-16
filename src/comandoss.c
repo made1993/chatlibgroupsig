@@ -87,8 +87,15 @@ int recvMsg(char * msg, int msglen){
 }
 
 int recvDisconnect(Usuario_t* usr){
+	char* buff;
+
+	buff =  malloc(strlen("/MSG server se ha desconectado") + strlen(usr->nick) +2);
+	sprintf(buff, "/MSG server %s se ha desconectado", usr->nick);
+	broadcastMsg(buff, strlen(buff)+1);
+	
 	delete_elem_list(listaUsuarios, (void*) usr);
 	liberarUsuario(usr);
+	free(buff);
 	return 0;
 }
 

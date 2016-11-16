@@ -58,11 +58,11 @@ int sendClientCiphMsg(Sconexion_t* scnx,const unsigned char* text, int textlen){
 
 
 	siglen = signMsgGS(scnx->grpkey, scnx->memkey, scnx->scheme, (char*)text, &sigstr);
-	fprintf(f, "%d\t%d:%s\n", textlen, siglen, text);
-	fclose(f);
 	msglen = sigMsgToStrGS((char*)text, textlen, sigstr, siglen, &msg);
 
 	bufflen = encrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)msg, (unsigned char**)&buff, msglen);
+	fprintf(f, "bufflen: %d siglen:%d msg:%d :%s\n", bufflen, siglen , textlen, text);
+	fclose(f);
 	
 	
 	if(bufflen <1)
@@ -80,25 +80,22 @@ int sendClientCiphMsg(Sconexion_t* scnx,const unsigned char* text, int textlen){
 int reciveServerCiphMsg(Sconexion_t* scnx, char** msg){
 	int msglen = 0, bufflen = 0, siglen = 0;
 	char* buff = NULL, *text =  NULL, *sigstr =  NULL;
-	FILE * f = NULL;
 	
 	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || scnx->iv == NULL	||
-	 scnx->grpkey == NULL || msg == NULL)
+	 scnx->grpkey == NULL || msg == NULL){
+		fprintf(stdout, "Error: NULL input at reciveServerCiphMsg\n");
 		return 0;
+	}
 	bufflen = recibir(scnx->socket, &buff);
 
-	printf("3\n");
 	msglen = decrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)buff, (unsigned char**)&text, bufflen);
-	if(!strToSigMsgGS(msg, &msglen, &sigstr, &siglen, text, msglen))
+	if(IERROR == strToSigMsgGS(msg, &msglen, &sigstr, &siglen, text, msglen)){
+		fprintf(stdout, "Error: recived invalid message siglen %d msglen %d\n", siglen, msglen);
 		return 0;
+	}
 
-	f = fopen("srecv.txt", "a");
-	fprintf(f, "%d\t%d:%s\n", msglen, siglen, *msg);
-	fclose(f);
-	printf("4\n");
-	if(!verifySignGS(sigstr, scnx->grpkey, *msg))
+	if(!verifySignGS(sigstr, scnx->grpkey, *msg, scnx->scheme))
 		return 0;
-	printf("5\n");
 
 	scnx->iv = realloc(scnx->iv, bufflen);
 	memcpy(scnx->iv, buff, bufflen);
@@ -254,7 +251,7 @@ int serverInitSConexion(Sconexion_t* scnx){
 
 	/*CHECK GS MSG*/
 	strToSigMsgGS(&msg, &msglen, &sigstr, &siglen, buff, bufflen);
-	if(!verifySignGS(sigstr, scnx->grpkey, msg))
+	if(!verifySignGS(sigstr, scnx->grpkey, msg, scnx->scheme))
 		return 0;
 
 	/*DERIVE AES KEY*/
@@ -291,7 +288,7 @@ int serverInitSConexion(Sconexion_t* scnx){
 
 	/*CHECK GS MSG*/
 	strToSigMsgGS(&msg, &msglen, &sigstr, &siglen, buff, bufflen);
-	if(!verifySignGS(sigstr, scnx->grpkey, msg))
+	if(!verifySignGS(sigstr, scnx->grpkey, msg, scnx->scheme))
 		return 0;
 
 	/*DERIVE AES IV*/

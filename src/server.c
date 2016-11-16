@@ -17,7 +17,7 @@ LinkedList* listaUsuarios;
 void* verificarCliente(void* args){
 	int* socket = NULL;
 	char * buff = NULL;
-	int bufflen, scheme = 0;
+	int bufflen, scheme = GROUPSIG_CPY06_CODE;
 	int key_format = -1;
 
 	groupsig_key_t *grpkey;
@@ -34,6 +34,7 @@ void* verificarCliente(void* args){
 
 	RSAfileToPrivKey(&privKeyRSA, s_rsaPrivKey);
 	if(privKeyRSA == NULL){
+		fprintf(stdout, "Error: failure loading RSA key\n");
 		liberarUsuario(usr);
 		free(usr);
 		return NULL;
@@ -64,11 +65,13 @@ void* verificarCliente(void* args){
 		return NULL;
 	}
 	if(!initUser(usr, *socket, grpkey, NULL, scheme, privKeyRSA)){
+		fprintf(stdout, "Error: failure creating new user.\n");
 		liberarUsuario(usr);
 		free(usr);
 		return NULL;
 	}
 	if(!serverInitSConexion(usr->scnx)){
+		fprintf(stdout, "Error: failure creating secure conexion.\n");
 		liberarUsuario(usr);
 		free(usr);
 		return NULL;
@@ -77,6 +80,7 @@ void* verificarCliente(void* args){
 
 		bufflen = reciveServerCiphMsg(usr->scnx, &buff);
 		if(bufflen < 1){
+			fprintf(stdout, "Error: invalid message at identification\n");
 			delete_elem_list(listaUsuarios, (void*) usr);
 			liberarUsuario(usr);
 			free(usr);
@@ -85,7 +89,7 @@ void* verificarCliente(void* args){
 
 		if(comando(buff)== NICK){
 			recvNick(usr, buff);
-			printf("Se registro %s\n", usr->nick);
+			fprintf(stdout, "Se registro %s\n", usr->nick);
 			sendServerCiphMsg(usr->scnx, (const unsigned char*)"/MSG server bienvenido",
 								 strlen((char*)"/MSG server bienvenido")+1);
 			//escribir(*usr->socket, "/MSG server bienvenido", strlen((char*)"/MSG server bienvenido")+1);
@@ -132,50 +136,50 @@ void* lecturaUsuario(void* args){
 	int bufflen, end = 0;
 	Usuario_t* usr = verificarCliente(args);
 	if(usr == NULL){
-		printf("ERR: fallo al verificar cliente\n");
+		fprintf(stdout, "Error: fallo al verificar cliente\n");
 		return NULL;
 	}
 	while(!end){
 		bufflen = reciveServerCiphMsg(usr->scnx, &buff);
 		if(bufflen  < 1){
-			printf( "%d\n", delete_elem_list(listaUsuarios, (void*) usr));
+			fprintf(stdout,  "%d\n", delete_elem_list(listaUsuarios, (void*) usr));
 			liberarUsuario(usr);
 			free(usr);
 			end = 1;
-			printf("cosas extrañas pueden pasar\n");
+			fprintf(stdout, "cosas extrañas pueden pasar\n");
 			break;
 		}
 		fwrite(buff, 1, bufflen, stdout);
-		printf("bufflen: [%d]\n", bufflen);
+		fprintf(stdout, "bufflen: [%d]\n", bufflen);
 		switch (comando(buff)){
 			case NICK:
-				printf("NICK\n");
+				fprintf(stdout, "NICK\n");
 				recvNick(usr, buff);
 			break;
 
 			case MSG:
-				printf("MSG\n");
+				fprintf(stdout, "MSG\n");
 				recvMsg(buff, bufflen);
 			break;
 
 			case DISCONNECT:
-				printf("DISCONNECT\n");
+				fprintf(stdout, "DISCONNECT\n");
 				recvDisconnect(usr);
 				end = 1;
 			break;
 
 			case PING:
-				printf("PING\n");
+				fprintf(stdout, "PING\n");
 				recvPing(usr);
 			break;
 
 			case PONG:			
-				printf("PONG\n");
+				fprintf(stdout, "PONG\n");
 				recvPong(usr);
 			break;
 
 			default:
-				printf("default\n");
+				fprintf(stdout, "default\n");
 
 			break;
 
@@ -184,7 +188,7 @@ void* lecturaUsuario(void* args){
 		}
 		free(buff);
 	}
-	printf("Usuario desconectado\n");
+	fprintf(stdout, "Usuario desconectado\n");
 	return NULL;
 }
 
@@ -213,14 +217,14 @@ int main(){
 		socketcli = malloc(sizeof(int));
 		*socketcli = aceptar(socket, ip4addr);
 
-		printf("nuevo cliente\n");
+		fprintf(stdout, "nuevo cliente\n");
 		usuarios++;
 		hilos= realloc(hilos, sizeof(pthread_t)*usuarios);
 
 		pthread_create(&hilos[usuarios-1],NULL, lecturaUsuario, (void*) socketcli);
 		
 	}
-	printf("fin\n");
+	fprintf(stdout, "fin\n");
 	return 0;
 }
 

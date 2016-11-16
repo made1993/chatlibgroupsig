@@ -41,6 +41,7 @@ void* hiloEscritura(void* args){
 			break;
 			case DISCONNECT:
 				end = sendDisconnect(scnx);
+				destroyClientUI();
 			break;
 			case PING:
 				sendPing(scnx);
@@ -55,7 +56,7 @@ void* hiloEscritura(void* args){
 		free(msg);
 		msg = NULL;
 	}
-
+	printf("hilo escritura termina\n");
 	pthread_cancel(h2);
 	return NULL;
 }
@@ -89,11 +90,15 @@ void* hiloLectura(void* args){
 			break;
 		}
 	}
+	printf("hilo lectura termina\n");
+
+	destroyClientUI();
 	pthread_cancel(h1);
 	return NULL;
 }
 
 int identificacion(char* nick){
+	printf("Se inicia la identificacion\n");
 	return sendNick(scnx, nick, strlen(nick)+1);
 }
 
@@ -104,8 +109,9 @@ int main(int argc , char *argv[]){
 	char * ip = NULL;
 	char * port = NULL;
 	int sockfd = -1;
+	void* thstatus;
 
-	int scheme = 0; 
+	int scheme = GROUPSIG_CPY06_CODE; 
 	groupsig_key_t *grpkey = NULL, *memkey = NULL;
 	EVP_PKEY* pubKeyRSA = NULL;
 	
@@ -169,8 +175,7 @@ int main(int argc , char *argv[]){
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
-	/*Creacion de la UI*/
-	createClientUI();
+	
 
 	/*Comenzamos la conexion TCP*/
 	if(0!=getaddrinfo(ip, port, &hints, &res)){
@@ -201,36 +206,40 @@ int main(int argc , char *argv[]){
 		fprintf(stderr, "Error: unknown scheme.\n");
 		return IERROR;
 	}
-
+	groupsig_init(time(NULL));
 	RSAfileToPubKey(&pubKeyRSA, s_pubKey);
 	if(pubKeyRSA == NULL){
 		printf("ERR\n");
 		return -1;
 	}
+
 	if(!(grpkey = groupsig_grp_key_import(scheme, key_format, s_grpkey))) {
 		fprintf(stderr, "Error: invalid group key %s.\n", s_grpkey);
 		return IERROR;
 	}
 
-	if(!(memkey = groupsig_mem_key_import(scheme,	key_format, s_memkey))) {
+	if(!(memkey = groupsig_mem_key_import(scheme, key_format, s_memkey))) {
 		fprintf(stderr, "Error: invalid member key %s.\n", s_memkey);
 		return IERROR;
 	}
 
 	scnx = initSconexion(sockfd, grpkey, memkey, scheme, pubKeyRSA);
-
 	if(scnx == NULL || !clientInitSConexion(scnx))
 		return 0;
 	
 
 	/*Conexion chat*/
-	
+	printf("identificacion\n");
 	identificacion(nick);
+
+	/*Creacion de la UI*/
+	createClientUI();
+
 	/*Creacion de los hilos*/
-	//pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );
+	pthread_create(&h1,NULL, hiloEscritura, (void *)NULL );
 	pthread_create(&h2,NULL, hiloLectura, (void *)NULL );
-	hiloEscritura(NULL);
-	destroyClientUI();
+	pthread_join(h2, &thstatus);
+	pthread_join(h1, &thstatus);
 	close(sockfd);
 	free(nick);
 	
