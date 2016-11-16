@@ -10,7 +10,7 @@ int sendNick(Sconexion_t * scnx, char* msg, int msglen){
 	if(strncmp(CNICK, msg, strlen(CNICK))!=0){
 		buff = malloc(sizeof(char) * (strlen(CNICK) + 2 + strlen(msg)));
 		sprintf(buff, "%s %s", CNICK, msg);
-		printf("Se envia: %s\n", buff);
+
 		ret = sendClientCiphMsg(scnx, (const unsigned char*)buff, msglen + strlen(CNICK) + 1);
 		//ret = escribir(socket, buff, msglen + strlen(CNICK) + 1);
 		free(buff);

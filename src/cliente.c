@@ -89,16 +89,16 @@ void* hiloLectura(void* args){
 				recvPong();
 			break;
 		}
+		free(msg);
 	}
-	printf("hilo lectura termina\n");
 
 	destroyClientUI();
+	printf("Se peridio la conexion con el servidor\n");
 	pthread_cancel(h1);
 	return NULL;
 }
 
 int identificacion(char* nick){
-	printf("Se inicia la identificacion\n");
 	return sendNick(scnx, nick, strlen(nick)+1);
 }
 
@@ -229,7 +229,6 @@ int main(int argc , char *argv[]){
 	
 
 	/*Conexion chat*/
-	printf("identificacion\n");
 	identificacion(nick);
 
 	/*Creacion de la UI*/
