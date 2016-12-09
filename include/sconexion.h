@@ -18,16 +18,19 @@ typedef struct SCONEXION
 	EVP_PKEY* keyRSA;
 }Sconexion_t;
 
-Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey, groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA);
+Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey, 
+	groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA);
 
 int freeSconexion(Sconexion_t* scnx);
 
-int sendClientCiphMsg(Sconexion_t* scnx, const unsigned char* text, int textlen);
+int sendClientCiphMsg(Sconexion_t* scnx,
+	const unsigned char* text, int textlen);
 
 int reciveServerCiphMsg(Sconexion_t* scnx, char** msg);
 
 
-int sendServerCiphMsg(Sconexion_t* scnx, const unsigned char* text, int textlen);
+int sendServerCiphMsg(Sconexion_t* scnx,
+	const unsigned char* text, int textlen);
 
 int reciveClientCiphMsg(Sconexion_t* scnx, char** msg);
 

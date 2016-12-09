@@ -1,6 +1,7 @@
 #include "../include/sconexion.h"
 
-Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey, groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA){
+Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey,
+		groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA){
 	Sconexion_t* scnx;
 	if(socket < 0 || grpkey == NULL  || keyRSA == NULL)
 		return NULL;
@@ -51,8 +52,9 @@ int sendClientCiphMsg(Sconexion_t* scnx,const unsigned char* text, int textlen){
 	int msglen = 0, bufflen = 0, siglen = 0;
 	char*  msg = NULL, *buff = NULL, *sigstr;
 	FILE* f = NULL;
-	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || scnx->iv == NULL ||
-	 text == NULL || textlen < 1 || scnx->grpkey == NULL || scnx->memkey == NULL)
+	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL ||
+		scnx->iv == NULL || text == NULL || textlen < 1 || scnx->grpkey == NULL || 
+		scnx->memkey == NULL)
 		return 0;
 	f = fopen("csend.txt", "a");
 
@@ -60,7 +62,8 @@ int sendClientCiphMsg(Sconexion_t* scnx,const unsigned char* text, int textlen){
 	siglen = signMsgGS(scnx->grpkey, scnx->memkey, scnx->scheme, (char*)text, &sigstr);
 	msglen = sigMsgToStrGS((char*)text, textlen, sigstr, siglen, &msg);
 
-	bufflen = encrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)msg, (unsigned char**)&buff, msglen);
+	bufflen = encrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)msg,
+				(unsigned char**)&buff, msglen);
 	fprintf(f, "bufflen: %d siglen:%d msg:%d :%s\n", bufflen, siglen , textlen, text);
 	fclose(f);
 	
@@ -81,14 +84,15 @@ int reciveServerCiphMsg(Sconexion_t* scnx, char** msg){
 	int msglen = 0, bufflen = 0, siglen = 0;
 	char* buff = NULL, *text =  NULL, *sigstr =  NULL;
 	
-	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || scnx->iv == NULL	||
-	 scnx->grpkey == NULL || msg == NULL){
+	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL ||
+		scnx->iv == NULL || scnx->grpkey == NULL || msg == NULL){
 		fprintf(stdout, "Error: NULL input at reciveServerCiphMsg\n");
 		return 0;
 	}
 	bufflen = recibir(scnx->socket, &buff);
 
-	msglen = decrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)buff, (unsigned char**)&text, bufflen);
+	msglen = decrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)buff,
+			(unsigned char**)&text, bufflen);
 	if(IERROR == strToSigMsgGS(msg, &msglen, &sigstr, &siglen, text, msglen)){
 		fprintf(stdout, "Error: recived invalid message siglen %d msglen %d\n", siglen, msglen);
 		return 0;
@@ -109,8 +113,8 @@ int reciveServerCiphMsg(Sconexion_t* scnx, char** msg){
 int sendServerCiphMsg(Sconexion_t* scnx, const unsigned char* text, int textlen){
 	int msglen = 0;
 	char*  msg = NULL;
-	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || scnx->iv == NULL ||
-	 text == NULL || textlen < 1)
+	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || 
+		scnx->iv == NULL || text == NULL || textlen < 1)
 		return 0;
 	
 	msglen = encrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, text, (unsigned char**)&msg, textlen);
@@ -128,13 +132,14 @@ int sendServerCiphMsg(Sconexion_t* scnx, const unsigned char* text, int textlen)
 int reciveClientCiphMsg(Sconexion_t* scnx, char** msg){
 	int bufflen = 0, msglen =0;
 	char*  buff = NULL;
-	if(scnx== NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || scnx->iv == NULL ||
-	 msg == NULL )
+	if(scnx== NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL || 
+		scnx->iv == NULL || msg == NULL )
 		return 0;
 	bufflen = recibir(scnx->socket, &buff);
 	if(bufflen <1)
 		return 0;
-	msglen = decrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)buff, (unsigned char**)msg, bufflen);
+	msglen = decrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)buff, 
+		(unsigned char**)msg, bufflen);
 	
 	scnx->iv = realloc(scnx->iv, bufflen);
 	memcpy(scnx->iv, buff, bufflen);
@@ -149,7 +154,8 @@ int clientInitSConexion(Sconexion_t* scnx){
 	char* sigstr = NULL, *msg = NULL, *buff = NULL;
 	int siglen = 0, msglen = 0, bufflen = 0;
 
-	if(scnx == NULL || scnx->socket < 0 || scnx->keyRSA == NULL || scnx->grpkey == NULL || scnx->memkey ==  NULL){
+	if(scnx == NULL || scnx->socket < 0 || scnx->keyRSA == NULL || scnx->grpkey == NULL || 
+		scnx->memkey ==  NULL){
 		return -1;
 	}
 	OpenSSL_add_all_algorithms();

@@ -28,12 +28,16 @@ int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey){
 		return 0;		
 	}
 	
-	if(1 != EVP_PKEY_assign_RSA(*privKey, RSAPrivateKey_dup(rsa))){
+	if(1 != EVP_PKEY_assign_RSA(*privKey, 
+						RSAPrivateKey_dup(rsa))){
+		
 		printf("ERR EVP_PKEY_assign_RSA\n");
 		return 0;
 	}
 
-	if(1 != EVP_PKEY_assign_RSA(*pubKey, RSAPublicKey_dup(rsa))){
+	if(1 != EVP_PKEY_assign_RSA(*pubKey, 
+						RSAPublicKey_dup(rsa))){
+		
 		printf("ERR EVP_PKEY_assign_RSA\n");
 		return 0;
 	}
@@ -41,7 +45,9 @@ int generateKeysRSA(EVP_PKEY** privKey, EVP_PKEY** pubKey){
 }
 
 
-int signMsgRSA(EVP_PKEY* key, const unsigned char* msg, unsigned char** sig, size_t* slen, size_t msglen){
+int signMsgRSA(EVP_PKEY* key, const unsigned char* msg, 
+	unsigned char** sig, size_t* slen, size_t msglen){
+	
 	EVP_MD_CTX* ctx = NULL;
 	const EVP_MD* md = NULL;
 	
@@ -96,7 +102,8 @@ int signMsgRSA(EVP_PKEY* key, const unsigned char* msg, unsigned char** sig, siz
 	return 1;
 
 }
-int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* msg, size_t slen, size_t msglen){
+int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, 
+	const unsigned char* msg, size_t slen, size_t msglen){
 	
 	EVP_MD_CTX* ctx = NULL;
 	const EVP_MD* md = NULL;
@@ -134,7 +141,9 @@ int verifySignRSA(EVP_PKEY* key, const unsigned char* sig, const unsigned char* 
 	return EVP_DigestVerifyFinal(ctx, sig, slen);
 }
 
-int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, unsigned char** msg){
+int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, 
+	unsigned char** msg){
+	
 	char* buff;
 	unsigned char* sig = NULL,* auxMsg;
 	int msglen = 0;
@@ -155,13 +164,16 @@ int reciveRSAsign(int sockfd, EVP_PKEY* pubKey, unsigned char** msg){
 	
 	*msg = auxMsg;
 	if( !verifySignRSA(pubKey, (const unsigned char*)sig, 
-						(const unsigned char*) auxMsg,  SHA256_SIGLEN, msglen - SHA256_SIGLEN))
+	(const unsigned char*) auxMsg,  SHA256_SIGLEN, msglen - SHA256_SIGLEN))
+		
 		return 0;
 	return msglen - SHA256_SIGLEN;
 }
 
 
-int sendRSAsign(int sockfd, EVP_PKEY* privKey, const unsigned char* msg, int msglen){
+int sendRSAsign(int sockfd, EVP_PKEY* privKey,
+	const unsigned char* msg, int msglen){
+	
 	unsigned char* buff = NULL;
 	size_t slen = 0;
 	/*CONTROL DE ERRORES*/
@@ -230,7 +242,9 @@ int RSAfileToPubKey(EVP_PKEY** pubKey, char* fname){
 
 int RSApubKeyToFile(EVP_PKEY* pubKey, char* fname, int* msglen){
 	FILE * f = NULL;
-	if(pubKey == NULL || fname == NULL || strlen(fname)<1 || msglen == NULL)
+	if(pubKey == NULL || fname == NULL ||
+		strlen(fname)<1 || msglen == NULL)
+		
 		 return 0;
 	f = fopen(fname, "w");
 	if (f == NULL)
@@ -265,7 +279,9 @@ int RSAfileToPrivKey(EVP_PKEY** privKey, char* fname){
 
 int RSAprivKeyToFile(EVP_PKEY* privKey, char* fname, int* msglen){
 	FILE * f = NULL;
-	if(privKey == NULL || fname == NULL || strlen(fname)<1 || msglen == NULL)
+	if(privKey == NULL || fname == NULL || 
+		strlen(fname)<1 || msglen == NULL)
+		
 		 return 0;
 	f = fopen(fname, "w");
 	if (f == NULL)
