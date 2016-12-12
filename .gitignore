@@ -9,5 +9,6 @@ msg.txt
 sig.txt
 privkey*
 pubkey*
+*.pub
 *.pem
 *.txt

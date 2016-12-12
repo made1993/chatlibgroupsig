@@ -1,5 +1,99 @@
 #include "../include/funcionesGS.h"
 
+
+int import_manager(groupsig_key_t** grpkey, groupsig_key_t** mgrkey, crl_t** crl, gml_t** gml, 
+			char* grpkeyf, char* mgrkeyf, char* crlf, char* gmlf, int scheme){
+
+	int key_format = -1;
+
+	if(grpkeyf == NULL || mgrkeyf == NULL || gmlf == NULL || crlf == NULL ||
+		strlen(grpkeyf) < 1 || strlen(mgrkeyf) < 1 || strlen(crlf) < 1 || strlen(gmlf) < 1){
+		return 0;
+	}
+	switch(scheme) {
+	case GROUPSIG_KTY04_CODE:
+		key_format = GROUPSIG_KEY_FORMAT_FILE_NULL_B64;
+		break;
+	case GROUPSIG_BBS04_CODE:
+
+	case GROUPSIG_CPY06_CODE:
+
+		key_format = GROUPSIG_KEY_FORMAT_FILE_NULL;
+		break;
+	default:
+		fprintf(stderr, "Error: unknown scheme.\n");
+		return 0;
+	}
+	
+	*grpkey = NULL; *mgrkey = NULL; *crl = NULL; *gml =  NULL;
+
+	*grpkey = groupsig_grp_key_import(scheme, key_format, grpkeyf);
+	if(*grpkey == NULL){
+		fprintf(stderr, "Error: invalid grpkey %s.\n", grpkeyf);
+		return 0;
+	}
+		
+	*mgrkey = groupsig_mgr_key_import(scheme, key_format, mgrkeyf);
+	if(*mgrkey == NULL){
+		fprintf(stderr, "Error: invalid mgrkey %s.\n", mgrkeyf);
+		return 0;
+	}
+
+	*crl = crl_import(scheme, CRL_FILE, crlf);
+	if(*crl == NULL){
+		fprintf(stderr, "Error: invalid crl %s.\n", crlf);
+		return 0;
+	}
+
+	*gml = gml_import(scheme, GML_FILE, gmlf);
+	if(*gml == NULL){
+		fprintf(stderr, "Error: invalid gml %s.\n", gmlf);
+		return 0;
+	}
+
+	return 1;
+
+}
+
+int import_member(groupsig_key_t** grpkey, groupsig_key_t** memkey, char* grpkeyf, char* memkeyf, int scheme){
+	
+	int key_format = -1;
+
+	if(grpkeyf == NULL || memkeyf == NULL || strlen(grpkeyf) < 1 || strlen(memkeyf) < 1 ){
+		return 0;
+	}
+	switch(scheme) {
+	case GROUPSIG_KTY04_CODE:
+		key_format = GROUPSIG_KEY_FORMAT_FILE_NULL_B64;
+		break;
+	case GROUPSIG_BBS04_CODE:
+
+	case GROUPSIG_CPY06_CODE:
+
+		key_format = GROUPSIG_KEY_FORMAT_FILE_NULL;
+		break;
+	default:
+		fprintf(stderr, "Error: unknown scheme.\n");
+		return 0;
+	}
+	
+	*grpkey = NULL; *memkey = NULL;
+
+	*grpkey = groupsig_grp_key_import(scheme, key_format, grpkeyf);
+	if(*grpkey == NULL){
+		fprintf(stderr, "Error: invalid grpkey %s.\n", grpkeyf);
+		return 0;
+	}
+	*memkey = groupsig_mem_key_import(scheme, key_format, memkeyf);
+	if(*memkey == NULL){
+		fprintf(stderr, "Error: invalid memkey %s.\n", memkeyf);
+		return 0;
+	}
+
+	return 1;
+}
+
+
 int signMsgGS(groupsig_key_t* grpkey, groupsig_key_t* memkey, uint8_t scheme,
 				char *msgstr, char** sigstr){
 	message_t* msg = NULL, *sigmsg =  NULL;
