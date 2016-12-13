@@ -58,3 +58,37 @@ int parseMsg(char* src, char** nick, char ** msg){
 
 	return 1;
 }
+int iniBigBrother(char* fname){
+	
+	/*file* f = NULL;
+	if(fname !=NULL){
+		
+	}*/
+	banWords =  malloc(sizeof(char*));
+	banWords[0] = malloc(strlen("cara anchoa")+1);
+	strcpy(banWords[0], "cara anchoa");
+	nwords = 1;
+}
+
+int bigBrother(char* msg, int msglen){
+	int i = 0;
+
+	for (; i < nwords; i++){
+		if(msglen < strlen(banWords[i]))
+			continue;
+
+		if(strstr(msg, banWords[i]) != NULL)
+			return 1;
+	}
+
+	return 0;
+}
+
+void freeBigBrother(){
+	int i = 0;
+	for (; i < nwords; i++){
+		free(banWords[i]);
+	}
+	free(banWords);
+}
+
