@@ -14,10 +14,10 @@ cliente: chatC src/cliente.c
 # OBJETOS CHAT
 
 chatC: cripto obj/usuario.o obj/conexion.o objC/comandosu.o obj/parser.o obj/comandos.o obj/linkedList.o objC/clientui.o
-	@echo "compilado el chat"
+	@echo "compilado el chat para el cliente"
 
 chatS: cripto obj/usuario.o obj/conexion.o objS/comandoss.o obj/parser.o obj/comandos.o obj/linkedList.o
-	@echo "compilado el chat"
+	@echo "compilado el chat para el servidor"
 
 obj/usuario.o: src/usuario.c include/usuario.h
 	@gcc $(FLAGS) -c -o obj/usuario.o src/usuario.c

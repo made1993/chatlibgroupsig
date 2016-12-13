@@ -94,15 +94,19 @@ int recvNick(char* msg){
 	char* nick1 = NULL, *nick2 = NULL;
 	char* str;
 	parseNick(msg, &nick1, &nick2);
-	if(nick1 == NULL || nick2 == NULL){
+	if(nick1 == NULL){
 		printMsg("NICK ERROR");
 		return -1;
 	}
 
-	if(strcmp(nick1, nick) == 0)
-		strcpy(nick, nick2);
-	str =  malloc(strlen(nick1) + strlen(nick2) + strlen((char*)"ahora es") + 3);
-	sprintf(str, "%s ahora es %s",nick1, nick2);
+	if(nick2 == NULL){
+		str =  malloc(strlen(nick1) + strlen((char*)"se conecto") + 2);
+		sprintf(str, "se conecto %s",nick1);
+	}else{
+		str =  malloc(strlen(nick1) + strlen(nick2) + strlen((char*)"ahora es") + 3);
+		sprintf(str, "%s ahora es %s",nick1, nick2);
+		
+	}
 	printMsg(str);
 	free(str);
 	free(nick1);

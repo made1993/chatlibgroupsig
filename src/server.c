@@ -14,66 +14,37 @@ pthread_t* hilos;
 
 LinkedList* listaUsuarios;
 
+EVP_PKEY* privKeyRSA = NULL;
+groupsig_key_t *grpkey = NULL;
+groupsig_key_t *mgrkey = NULL;
+crl_t* crl = NULL;
+gml_t* gml = NULL;
+
+int scheme = GROUPSIG_CPY06_CODE;
+
 void* verificarCliente(void* args){
 	int* socket = NULL;
 	char * buff = NULL;
-	int bufflen, scheme = GROUPSIG_CPY06_CODE;
-	int key_format = -1;
-
-	groupsig_key_t *grpkey;
-	EVP_PKEY* privKeyRSA = NULL;
-
-	char s_grpkey[] = ".fg/group/grp.key";
-	char s_rsaPrivKey[] = "privkey.pem";
+	int bufflen;
 
 	socket = (int*) args;
 	Usuario_t* usr = NULL;
 	usr = crearUsuario();
 	if(usr == NULL)
 		return NULL;
-
-	RSAfileToPrivKey(&privKeyRSA, s_rsaPrivKey);
-	if(privKeyRSA == NULL){
-		fprintf(stdout, "Error: failure loading RSA key\n");
-		liberarUsuario(usr);
-		free(usr);
-		return NULL;
-	}
-	switch(scheme) {
-	case GROUPSIG_KTY04_CODE:
-		key_format = GROUPSIG_KEY_FORMAT_FILE_NULL_B64;
-		break;
-	case GROUPSIG_BBS04_CODE:
-
-	case GROUPSIG_CPY06_CODE:
-
-		key_format = GROUPSIG_KEY_FORMAT_FILE_NULL;
-		break;
-	default:
-		fprintf(stderr, "Error: unknown scheme.\n");
-		liberarUsuario(usr);
-		free(usr);
-		return NULL;
-	}
-
-	groupsig_init(time(NULL));
-
-	if(!(grpkey = groupsig_grp_key_import(scheme, key_format, s_grpkey))) {
-		fprintf(stderr, "Error: invalid group key %s.\n", s_grpkey);
-		liberarUsuario(usr);
-		free(usr);
-		return NULL;
-	}
+	
 	if(!initUser(usr, *socket, grpkey, NULL, scheme, privKeyRSA)){
 		fprintf(stdout, "Error: failure creating new user.\n");
 		liberarUsuario(usr);
 		free(usr);
+		usr = NULL;
 		return NULL;
 	}
 	if(!serverInitSConexion(usr->scnx)){
 		fprintf(stdout, "Error: failure creating secure conexion.\n");
 		liberarUsuario(usr);
 		free(usr);
+		usr = NULL;
 		return NULL;
 	}
 	while(1){
@@ -82,8 +53,9 @@ void* verificarCliente(void* args){
 		if(bufflen < 1){
 			fprintf(stdout, "Error: invalid message at identification\n");
 			delete_elem_list(listaUsuarios, (void*) usr);
-			liberarUsuario(usr);
+			liberarUsuario(usr); 
 			free(usr);
+			usr = NULL;
 			return NULL;
 		}
 
@@ -123,6 +95,8 @@ void* controlDeConexion(void* args){
 				sendDisconnect(usr);
 				delete_elem_list(listaUsuarios, (void*) usr);
 				liberarUsuario(usr);
+				free(usr);
+				usr = NULL;
 
 			}
 			nd= nd->next;
@@ -143,8 +117,10 @@ void* lecturaUsuario(void* args){
 		bufflen = reciveServerCiphMsg(usr->scnx, &buff);
 		if(bufflen  < 1){
 			fprintf(stdout,  "%d\n", delete_elem_list(listaUsuarios, (void*) usr));
+			recvDisconnect(usr);
 			liberarUsuario(usr);
 			free(usr);
+			usr = NULL;
 			end = 1;
 			fprintf(stdout, "cosas extrañas pueden pasar\n");
 			break;
@@ -165,6 +141,8 @@ void* lecturaUsuario(void* args){
 			case DISCONNECT:
 				fprintf(stdout, "DISCONNECT\n");
 				recvDisconnect(usr);
+				liberarUsuario(usr);
+				free(usr);
 				end = 1;
 			break;
 
@@ -189,6 +167,7 @@ void* lecturaUsuario(void* args){
 		free(buff);
 	}
 	fprintf(stdout, "Usuario desconectado\n");
+
 	return NULL;
 }
 
@@ -200,6 +179,27 @@ int main(){
 	pthread_t hiloPing;
 	struct sockaddr_in ip4addr;
 
+	char s_grpkey[] = ".fg/group/grp.key";
+	char s_crl[] = ".fg/manager/crl";
+	char s_gml[] = ".fg/manager/gml";
+	char s_mgrkey[] = ".fg/manager/mgr.key";
+	
+
+	char s_rsaPrivKey[] = "privkey.pem";
+
+	RSAfileToPrivKey(&privKeyRSA, s_rsaPrivKey);
+	if(privKeyRSA == NULL){
+		fprintf(stdout, "Error: failure loading RSA key\n");
+		return 0;
+	}
+
+
+	groupsig_init(time(NULL));
+
+	if(0 == import_manager(&grpkey, &mgrkey, &crl, &gml, 
+			s_grpkey, s_mgrkey, s_crl, s_gml, scheme))
+		return 0;
+
 	socket = abrirSocketTCP();
 	if(socket < 1)
 		return 0;
@@ -210,6 +210,7 @@ int main(){
 	if(abrirListen(socket) == -1)
 		return 0;
 
+	
 	listaUsuarios = create_list(compareUsr);
 	pthread_create(&hiloPing,NULL, controlDeConexion, NULL );
 
@@ -222,9 +223,17 @@ int main(){
 		hilos= realloc(hilos, sizeof(pthread_t)*usuarios);
 
 		pthread_create(&hilos[usuarios-1],NULL, lecturaUsuario, (void*) socketcli);
+		pthread_detach(hilos[usuarios-1]);
 		
 	}
+
 	fprintf(stdout, "fin\n");
+	free(privKeyRSA);
+	free(grpkey);
+	free(mgrkey);
+	free(crl);
+	free(gml);
+
 	return 0;
 }
 

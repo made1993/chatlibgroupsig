@@ -1,5 +1,7 @@
 #include "../include/parser.h"
 
+char** banWords = NULL;
+int nwords;
 
 int parseNick(char* src, char** nick1, char ** nick2){
 	char *pch1 = NULL, *pch2 = NULL;	
@@ -22,8 +24,9 @@ int parseNick(char* src, char** nick1, char ** nick2){
 		memcpy(*nick1, pch1, pch2 - pch1);
 		(*nick1)[pch2 - pch1] = '\0';
 	}
-	if(pch2 == NULL)
+	if(pch2 == NULL){
 		return 0;
+	}
 	pch2 ++;
 	*nick2 = malloc(strlen(pch2) + 1);
 	memcpy(*nick2, pch2, strlen(pch2) + 1);
@@ -58,7 +61,7 @@ int parseMsg(char* src, char** nick, char ** msg){
 
 	return 1;
 }
-int iniBigBrother(char* fname){
+void iniBigBrother(char* fname){
 	
 	/*file* f = NULL;
 	if(fname !=NULL){
@@ -91,4 +94,3 @@ void freeBigBrother(){
 	}
 	free(banWords);
 }
-

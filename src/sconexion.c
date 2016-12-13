@@ -33,16 +33,8 @@ int freeSconexion(Sconexion_t* scnx){
 		free(scnx->iv); scnx->iv = NULL;
 	}
 
-	if(scnx->grpkey != NULL){
-		free(scnx->grpkey); scnx->grpkey = NULL;
-	}
-
 	if(scnx->memkey != NULL){
 		free(scnx->memkey); scnx->memkey = NULL;
-	}
-
-	if(scnx->keyRSA != NULL){
-		free(scnx->keyRSA); scnx->keyRSA = NULL;
 	}
 	return 1;
 }

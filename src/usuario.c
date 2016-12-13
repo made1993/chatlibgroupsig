@@ -8,6 +8,7 @@ Usuario_t* crearUsuario(){
 	usr = malloc(sizeof(Usuario_t));
 	usr->id = nUsr++;
 	usr->nick = malloc(NICK_MAX_LEN + 1);
+	usr->nick[0] = '\0';
 	setCurrentPingt(usr);
 	return usr;
 }
@@ -24,8 +25,10 @@ int initUser(Usuario_t* usr, int socket, groupsig_key_t *grpkey, groupsig_key_t 
 int liberarUsuario(Usuario_t* usr){
 	if(usr == NULL)
 		return 1;
-	if(!(usr->nick == NULL))
+	if(!(usr->nick == NULL)){
 		free(usr->nick);
+		usr->nick = NULL;
+	}
 	freeSconexion(usr->scnx); 
 	free(usr->scnx); usr->scnx = NULL;
 	return 0; 

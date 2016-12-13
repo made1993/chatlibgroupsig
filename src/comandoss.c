@@ -44,9 +44,20 @@ int sendNick(Usuario_t* usr, char* nick){
 	char* msg =  NULL;
 	if(usr == NULL || nick == NULL || strlen(nick) < 1)
 		return -1;
-	msg =  malloc(strlen(CNICK) + strlen(usr->nick) + strlen(nick) +3);
-	sprintf(msg, "%s %s %s", CNICK, usr->nick, nick);
+	printf("%s\n%s\n", usr->nick, nick);
+	if(strlen(usr->nick) == 0){
+		printf("registro\n");
+		msg =  malloc(strlen(CNICK)+ strlen(nick) +2);
+		sprintf(msg, "%s %s", CNICK, nick);
+	}
+	else{
+		printf("cambio de nick\n");
+		msg =  malloc(strlen(CNICK) + strlen(usr->nick) + strlen(nick) +3);
+		sprintf(msg, "%s %s %s", CNICK, usr->nick, nick);
+	}
 	broadcastMsg(msg, strlen(msg)+1);
+	free(msg);
+
 	return 0;
 }
 int sendDisconnect(Usuario_t* usr){
@@ -73,8 +84,8 @@ int recvNick(Usuario_t* usr, char* msg){
 	sendNick(usr, nick1);
 
 	setNick(usr, nick1);
-
-
+	free(nick1);
+	free(nick2);
 	return 0;
 
 }
@@ -91,10 +102,8 @@ int recvDisconnect(Usuario_t* usr){
 
 	buff =  malloc(strlen("/MSG server se ha desconectado") + strlen(usr->nick) +2);
 	sprintf(buff, "/MSG server %s se ha desconectado", usr->nick);
-	broadcastMsg(buff, strlen(buff)+1);
-	
+	broadcastMsg(buff, strlen(buff)+1);	
 	delete_elem_list(listaUsuarios, (void*) usr);
-	liberarUsuario(usr);
 	free(buff);
 	return 0;
 }
