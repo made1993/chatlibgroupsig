@@ -173,6 +173,38 @@ int verifySignGS(char* sigstr, groupsig_key_t *grpkey, char* msgstr, uint8_t sch
 	return bool;
 }
 
+
+int traceSignGS(char* sigstr, groupsig_key_t *grpkey, groupsig_key_t *mgrkey, crl_t* crl,
+			gml_t* gml, uint8_t scheme){
+	uint8_t bool = 0;
+	message_t * sigmsg = NULL;
+	groupsig_signature_t* sig = NULL;
+
+		if(sigstr == NULL || grpkey == NULL || mgrkey == NULL || 
+			crl == NULL || gml == NULL){
+		fprintf(stderr, "Error: NULL input.\n");
+		return IERROR;
+	}
+
+	sigmsg =  message_init();	
+	memcpy(&sigmsg->length, sigstr, sizeof(uint64_t));
+	sigmsg->bytes = malloc(sigmsg->length);
+	memcpy(sigmsg->bytes, sigstr + sizeof(uint64_t), sigmsg->length);
+
+	if((sig = groupsig_signature_import(scheme, GROUPSIG_SIGNATURE_FORMAT_MESSAGE_NULL, sigmsg)) ==  NULL){
+		printf("Error: failed to import the signature.\n" );
+		return IERROR;	
+	}
+
+	if(groupsig_trace(&bool, sig, grpkey, crl, mgrkey, gml) == IERROR) {
+		fprintf(stderr, "Error: failed to trace the signature.\n");
+		return 1;
+    }
+    message_free(sigmsg);
+	groupsig_signature_free(sig);
+    return bool;
+}
+
 int sigMsgToStrGS(char * msgstr, int msglen, char* sigstr, int siglen, char** dst){
 	int size = -1;
 	if(msgstr == NULL || msglen < 1 || sigstr == NULL || siglen < 1 || dst == NULL){

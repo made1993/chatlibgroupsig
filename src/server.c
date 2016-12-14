@@ -40,7 +40,7 @@ void* verificarCliente(void* args){
 		usr = NULL;
 		return NULL;
 	}
-	if(!serverInitSConexion(usr->scnx)){
+	if(!serverInitSConexion(usr->scnx, mgrkey, crl, gml)){
 		fprintf(stdout, "Error: failure creating secure conexion.\n");
 		liberarUsuario(usr);
 		free(usr);

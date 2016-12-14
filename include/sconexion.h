@@ -36,7 +36,8 @@ int reciveClientCiphMsg(Sconexion_t* scnx, char** msg);
 
 int clientInitSConexion(Sconexion_t* scnx);
 
-int serverInitSConexion(Sconexion_t* scnx);
+int serverInitSConexion(Sconexion_t* scnx, groupsig_key_t *mgrkey,
+	crl_t* crl, gml_t* gml);
 
 
 #endif

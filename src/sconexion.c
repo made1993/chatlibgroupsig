@@ -220,7 +220,7 @@ int clientInitSConexion(Sconexion_t* scnx){
 }
 
 
-int serverInitSConexion(Sconexion_t* scnx){
+int serverInitSConexion(Sconexion_t* scnx, groupsig_key_t *mgrkey, crl_t* crl, gml_t* gml){
 	EVP_PKEY* paramsDH = NULL, *DHkey = NULL, *DHpeerKey = NULL;
 	EVP_PKEY_CTX* pctxDH = NULL;
 	char* sigstr = NULL, *msg = NULL, *buff = NULL;
@@ -250,6 +250,9 @@ int serverInitSConexion(Sconexion_t* scnx){
 	/*CHECK GS MSG*/
 	strToSigMsgGS(&msg, &msglen, &sigstr, &siglen, buff, bufflen);
 	if(!verifySignGS(sigstr, scnx->grpkey, msg, scnx->scheme))
+		return 0;
+
+	if(traceSignGS(sigstr, scnx->grpkey, mgrkey, crl, gml, scnx->scheme))
 		return 0;
 
 	/*DERIVE AES KEY*/
