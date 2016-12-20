@@ -19,28 +19,28 @@ chatC: cripto obj/usuario.o obj/conexion.o objC/comandosu.o obj/parser.o obj/com
 chatS: cripto obj/usuario.o obj/conexion.o objS/comandoss.o obj/parser.o obj/comandos.o obj/linkedList.o
 	@echo "compilado el chat para el servidor"
 
-obj/usuario.o: src/usuario.c include/usuario.h
+obj/usuario.o: obj src/usuario.c include/usuario.h
 	@gcc $(FLAGS) -c -o obj/usuario.o src/usuario.c
 
-obj/conexion.o: src/conexion.c include/conexion.h
+obj/conexion.o: obj src/conexion.c include/conexion.h
 	@gcc $(FLAGS) -c -o obj/conexion.o src/conexion.c
 
-objC/comandosu.o: src/comandosu.c include/comandosu.h
+objC/comandosu.o: objC src/comandosu.c include/comandosu.h
 	@gcc $(FLAGS) -c -o objC/comandosu.o src/comandosu.c
 
-objS/comandoss.o: src/comandoss.c include/comandoss.h
+objS/comandoss.o: objS src/comandoss.c include/comandoss.h
 	@gcc $(FLAGS) -c -o objS/comandoss.o src/comandoss.c
 
-obj/parser.o: src/parser.c include/parser.h
+obj/parser.o: obj src/parser.c include/parser.h
 	@gcc $(FLAGS) -c -o obj/parser.o src/parser.c
 
-obj/comandos.o: src/comandos.c include/comandos.h
+obj/comandos.o: obj src/comandos.c include/comandos.h
 	@gcc $(FLAGS) -c -o obj/comandos.o src/comandos.c
 
-obj/linkedList.o: src/linkedList.c include/linkedList.h
+obj/linkedList.o: obj src/linkedList.c include/linkedList.h
 	@gcc $(FLAGS) -c -o obj/linkedList.o src/linkedList.c 
 
-objC/clientui.o: src/clientui.c include/linkedList.h
+objC/clientui.o: objC src/clientui.c include/linkedList.h
 	@gcc $(FLAGS) -c -o objC/clientui.o src/clientui.c 
 
 #PROTOCOLOS CRIPTOGRAFICOS
@@ -48,38 +48,49 @@ objC/clientui.o: src/clientui.c include/linkedList.h
 cripto: obj/funcionesDH.o obj/funcionesAES.o obj/funcionesRSA.o obj/funcionesGS.o obj/sconexion.o
 	@echo "compilados los protocolos criptograficos"
 
-obj/sconexion.o: src/sconexion.c include/sconexion.h
+obj/sconexion.o: obj src/sconexion.c include/sconexion.h
 	@gcc $(FLAGS) -c -o obj/sconexion.o src/sconexion.c 
 
-obj/funcionesDH.o: src/funcionesDH.c include/funcionesDH.h
+obj/funcionesDH.o: obj src/funcionesDH.c include/funcionesDH.h
 	@gcc $(FLAGS) -c -o obj/funcionesDH.o src/funcionesDH.c 
 
-obj/funcionesAES.o: src/funcionesAES.c include/funcionesAES.h
+obj/funcionesAES.o: obj src/funcionesAES.c include/funcionesAES.h
 	@gcc $(FLAGS) -c -o obj/funcionesAES.o src/funcionesAES.c 
 
-obj/funcionesRSA.o: src/funcionesRSA.c obj/conexion.o include/funcionesRSA.h
+obj/funcionesRSA.o: obj src/funcionesRSA.c obj/conexion.o include/funcionesRSA.h
 	@gcc $(FLAGS) -c -o obj/funcionesRSA.o src/funcionesRSA.c
 
-obj/funcionesGS.o: src/funcionesGS.c include/funcionesGS.h
+obj/funcionesGS.o: obj src/funcionesGS.c include/funcionesGS.h
 	@gcc $(FLAGS) -c -o obj/funcionesGS.o src/funcionesGS.c 
 
 # TESTS
 
-testRSA: test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
+testRSA: obj test/serverRSA.c test/clientRSA.c obj/funcionesRSA.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerRSA test/serverRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)	
 	@gcc $(FLAGS) -o TestClientRSA test/clientRSA.c obj/funcionesRSA.o obj/conexion.o $(SSLLIBS)
 
-testDH: test/serverDH.c test/clientDH.c obj/funcionesDH.o obj/conexion.o
+testDH: obj test/serverDH.c test/clientDH.c obj/funcionesDH.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerDH test/serverDH.c obj/* $(SSLLIBS)
 	@gcc $(FLAGS) -o TestClientDH test/clientDH.c obj/* $(SSLLIBS)
 
-testAES: test/AES.c obj/funcionesAES.o
+testAES: obj test/AES.c obj/funcionesAES.o
 	@gcc $(FLAGS) -o TestAES test/AES.c obj/funcionesAES.o $(SSLLIBS)
 
-testGS: test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
+testGS: obj test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerGS test/serverGS.c obj/* $(GSLIBS) $(SSLLIBS)
 	@gcc $(FLAGS) -o TestClientGS test/clientGS.c obj/* $(GSLIBS) $(SSLLIBS)
 
+
+# DIRECTORIOS
+
+obj:
+	@mkdir obj
+
+objC:
+	@mkdir objC
+
+objS:
+	@mkdir objS
 
 #GENERAR CLAVES
 RSAkeys:
