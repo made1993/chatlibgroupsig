@@ -92,6 +92,13 @@ int recvNick(Usuario_t* usr, char* msg){
 int recvMsg(char * msg, int msglen){
 	if(listaUsuarios == NULL || msg == NULL || msglen < 1)
 		return -1;
+
+	/*COMPROBAR EL MENSAJE*/
+
+	if(bigBrother(msg))
+		return 1;
+	
+
 	broadcastMsg(msg, msglen);
 
 	return 0;

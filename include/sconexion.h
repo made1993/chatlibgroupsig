@@ -16,6 +16,8 @@ typedef struct SCONEXION
 	groupsig_key_t *memkey;	
 	int scheme;
 	EVP_PKEY* keyRSA;
+	char* lastsig;
+	int siglen;
 }Sconexion_t;
 
 Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey, 
@@ -34,10 +36,14 @@ int sendServerCiphMsg(Sconexion_t* scnx,
 
 int reciveClientCiphMsg(Sconexion_t* scnx, char** msg);
 
+int revokeClient(Sconexion_t* scnx, groupsig_key_t *mgrkey, gml_t *gml, crl_t *crl, char* s_crlf);
+
 int clientInitSConexion(Sconexion_t* scnx);
+
 
 int serverInitSConexion(Sconexion_t* scnx, groupsig_key_t *mgrkey,
 	crl_t* crl, gml_t* gml);
 
+int crlRelaod(Sconexion_t* scnx, crl_t** crl, char* s_crl);
 
 #endif

@@ -73,18 +73,29 @@ void iniBigBrother(char* fname){
 	nwords = 1;
 }
 
-int bigBrother(char* msg, int msglen){
-	int i = 0;
+int bigBrother(char* src){
+	int i = 0, msglen = 0, ret = 0;
+	char *msg = NULL, *nick = NULL;
 
+
+	if(src == NULL || strlen(src)<1)
+		return 0;
+	printf("[%s]\n", src);
+	parseMsg(src, &nick, &msg);
+
+	msglen = strlen(msg)+1;
 	for (; i < nwords; i++){
 		if(msglen < strlen(banWords[i]))
 			continue;
 
-		if(strstr(msg, banWords[i]) != NULL)
-			return 1;
+		if(strstr(msg, banWords[i]) != NULL){
+			ret = 1;
+			break;
+		}
 	}
-
-	return 0;
+	free(nick);
+	free(msg);
+	return ret;
 }
 
 void freeBigBrother(){

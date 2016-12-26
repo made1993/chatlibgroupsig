@@ -14,6 +14,8 @@ Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey,
 	scnx->key = NULL;
 	scnx->iv = NULL;
 	scnx->ctx = create_ctx();
+	scnx->lastsig = NULL;
+	scnx->siglen = 0;
 	return scnx;
 }
 
@@ -95,8 +97,10 @@ int reciveServerCiphMsg(Sconexion_t* scnx, char** msg){
 
 	scnx->iv = realloc(scnx->iv, bufflen);
 	memcpy(scnx->iv, buff, bufflen);
-
-	free(sigstr);
+	if(scnx != NULL)
+		free(scnx->lastsig);
+	scnx->lastsig = sigstr;
+	scnx->siglen = siglen;
 	free(text);
 	free(buff);
 	return msglen;
@@ -139,6 +143,29 @@ int reciveClientCiphMsg(Sconexion_t* scnx, char** msg){
 	free(buff);
 	return msglen;
 }
+
+int revokeClient(Sconexion_t* scnx, groupsig_key_t *mgrkey, gml_t *gml, crl_t *crl, char* s_crlf){
+
+	groupsig_signature_t* sig = NULL;
+	message_t* sigmsg = NULL;
+
+	sigmsg =  message_init();	
+	memcpy(&sigmsg->length, scnx->lastsig, sizeof(uint64_t));
+	sigmsg->bytes = malloc(sigmsg->length);
+	memcpy(sigmsg->bytes, scnx->lastsig + sizeof(uint64_t), sigmsg->length);
+
+	if((sig = groupsig_signature_import(scnx->scheme, GROUPSIG_SIGNATURE_FORMAT_MESSAGE_NULL, sigmsg)) ==  NULL){
+		printf("Error: failed to import the signature.\n" );
+		return IERROR;	
+	}
+
+	revokeSigGS(sig, scnx->grpkey, mgrkey, gml, crl, scnx->scheme, s_crlf);
+	message_free(sigmsg);
+	groupsig_signature_free(sig);
+	return IOK;
+
+}
+
 
 int clientInitSConexion(Sconexion_t* scnx){
 	EVP_PKEY* DHkey = NULL, *DHpeerKey = NULL;
@@ -305,6 +332,20 @@ int serverInitSConexion(Sconexion_t* scnx, groupsig_key_t *mgrkey, crl_t* crl, g
 	EVP_PKEY_free(DHpeerKey); DHpeerKey = NULL;
 	EVP_PKEY_CTX_free(pctxDH); pctxDH = NULL;
 
+	return 1;
+
+}
+
+
+int crlRelaod(Sconexion_t* scnx, crl_t** crl, char* s_crl){
+
+	crl_free(*crl); *crl = NULL;
+	*crl = crl_import(scnx->scheme, CRL_FILE, s_crl);
+	if(*crl == NULL){
+		fprintf(stderr, "Error: invalid crl %s.\n", s_crl);
+		return 0;
+	}
+	
 	return 1;
 
 }

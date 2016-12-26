@@ -11,7 +11,7 @@ int parseNick(char* src, char** nick1, char ** nick2);
 int parseMsg(char* src, char** nick, char ** msg);
 
 void iniBigBrother(char* fname);
-int bigBrother(char* msg, int msglen);
+int bigBrother(char* src);
 void freeBigBrother();
 
 #endif

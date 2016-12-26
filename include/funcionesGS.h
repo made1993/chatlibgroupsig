@@ -19,6 +19,8 @@ int signMsgGS(groupsig_key_t* grpkey, groupsig_key_t* memkey, uint8_t scheme, ch
 int verifySignGS(char* sigstr, groupsig_key_t *grpkey, char* msgstr, uint8_t scheme);
 
 int traceSignGS(char* sigstr, groupsig_key_t *grpkey, groupsig_key_t *mgrkey, crl_t* crl, gml_t* gml, uint8_t scheme);
+int revokeSigGS(groupsig_signature_t *sig, groupsig_key_t *grpkey, groupsig_key_t *mgrkey,
+			 gml_t *gml,  crl_t *crl, uint8_t scheme, char *s_crl);
 
 int sigMsgToStrGS(char * msgstr, int msglen, char* sigstr, int siglen, char** dst);
 

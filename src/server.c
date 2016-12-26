@@ -19,7 +19,7 @@ groupsig_key_t *grpkey = NULL;
 groupsig_key_t *mgrkey = NULL;
 crl_t* crl = NULL;
 gml_t* gml = NULL;
-
+char* s_crlf = NULL;
 int scheme = GROUPSIG_CPY06_CODE;
 
 void* verificarCliente(void* args){
@@ -135,7 +135,18 @@ void* lecturaUsuario(void* args){
 
 			case MSG:
 				fprintf(stdout, "MSG\n");
-				recvMsg(buff, bufflen);
+				if(recvMsg(buff, bufflen)){
+					/*SE REVOCA AL MIEMBRO*/
+					revokeClient(usr->scnx, mgrkey, gml, crl, s_crlf);
+					printf("se empieza a recargar el crl\n");
+					crlRelaod(usr->scnx, &crl, s_crlf);
+					printf("se recargo el crl\n");
+
+					recvDisconnect(usr);
+					liberarUsuario(usr);
+					free(usr);
+					end = 1;
+				}
 			break;
 
 			case DISCONNECT:
@@ -184,6 +195,7 @@ int main(){
 	char s_gml[] = ".fg/manager/gml";
 	char s_mgrkey[] = ".fg/manager/mgr.key";
 	
+	s_crlf = s_crl;
 
 	char s_rsaPrivKey[] = "privkey.pem";
 
@@ -193,7 +205,8 @@ int main(){
 		return 0;
 	}
 
-
+	/*INICIAIZACION DE COSAS VARIAS*/
+	iniBigBrother(NULL);
 	groupsig_init(time(NULL));
 
 	if(0 == import_manager(&grpkey, &mgrkey, &crl, &gml, 
@@ -233,6 +246,7 @@ int main(){
 	free(mgrkey);
 	free(crl);
 	free(gml);
+	freeBigBrother();
 
 	return 0;
 }

@@ -119,7 +119,7 @@ int main(int argc , char *argv[]){
 	int key_format;
 
 	char s_grpkey[] = ".fg/group/grp.key";
-	char s_memkey[] = ".fg/members/0.key";
+	char s_memkey[] = ".fg/members/3.key";
 	char s_pubKey[] = "pubkey.pub";
 
 	static struct option options[] = {

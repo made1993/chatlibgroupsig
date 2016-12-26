@@ -31,7 +31,7 @@ objC/comandosu.o: objC src/comandosu.c include/comandosu.h
 objS/comandoss.o: objS src/comandoss.c include/comandoss.h
 	@gcc $(FLAGS) -c -o objS/comandoss.o src/comandoss.c
 
-obj/parser.o: obj src/parser.c include/parser.h
+obj/parser.o: src/parser.c include/parser.h
 	@gcc $(FLAGS) -c -o obj/parser.o src/parser.c
 
 obj/comandos.o: obj src/comandos.c include/comandos.h
@@ -80,6 +80,8 @@ testGS: obj test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
 	@gcc $(FLAGS) -o TestServerGS test/serverGS.c obj/* $(GSLIBS) $(SSLLIBS)
 	@gcc $(FLAGS) -o TestClientGS test/clientGS.c obj/* $(GSLIBS) $(SSLLIBS)
 
+testBan: obj/parser.o test/bans.c
+	@gcc $(FLAGS) -o TestBan test/bans.c obj/*
 
 # DIRECTORIOS
 

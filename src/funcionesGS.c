@@ -205,6 +205,43 @@ int traceSignGS(char* sigstr, groupsig_key_t *grpkey, groupsig_key_t *mgrkey, cr
     return bool;
 }
 
+
+int revokeSigGS(groupsig_signature_t *sig, groupsig_key_t *grpkey, groupsig_key_t *mgrkey,
+			 gml_t *gml,  crl_t *crl, uint8_t scheme, char *s_crl){
+	identity_t *id = NULL;
+	int rc = 0;
+	trapdoor_t *trap = NULL;
+	if (sig == NULL || grpkey == NULL || mgrkey == NULL || gml == NULL || crl == NULL)
+		return IERROR;
+
+	if(!(id = identity_init(scheme))){
+		fprintf(stderr, "Error creating identity.\n");
+		return IERROR;
+	}
+	if((rc = groupsig_open(id, NULL, NULL, sig, grpkey, mgrkey, gml)) == IERROR) {
+		fprintf(stderr, "Error opening signature.\n");
+		return IERROR;
+    }
+	if(!(trap = trapdoor_init(scheme))) {
+		fprintf(stderr, "Error creating trapdoor.\n");
+		return IERROR;
+	}
+
+	if(groupsig_reveal(trap, crl, gml, *(uint64_t *) id->id) == IERROR) {
+		fprintf(stderr, "Error in reveal.\n");
+		return IERROR;
+	}
+
+	if(crl_export(crl, s_crl, CRL_FILE) == IERROR) {
+		fprintf(stderr, "Error exporting CRL.\n");
+		return IERROR;
+	}
+	identity_free(id); id = NULL;
+	trapdoor_free(trap); trap = NULL;
+
+	return IOK;
+}
+
 int sigMsgToStrGS(char * msgstr, int msglen, char* sigstr, int siglen, char** dst){
 	int size = -1;
 	if(msgstr == NULL || msglen < 1 || sigstr == NULL || siglen < 1 || dst == NULL){
