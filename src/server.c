@@ -5,10 +5,18 @@
 #include <pthread.h>
 
 #include "../include/comandoss.h"
-#define PING_SLEEP 30
 #define PING_MAX 60
+#ifdef TIMETEST
+
+#define PING_SLEEP 30
 #define PING_TIME 30
 
+#else
+
+#define PING_SLEEP 1
+#define PING_TIME 1
+
+#endif
 
 pthread_t* hilos;
 
@@ -86,7 +94,7 @@ void* controlDeConexion(void* args){
 	#ifdef TIMETEST 
 	clock_t ini, fin, tot;
 	FILE* f = NULL;
-	fopen("tmedioenv.dat", "w");
+	f =fopen("tmedioenv.dat", "w");
 	#endif
 	while(1){
 		nd = listaUsuarios->first;
