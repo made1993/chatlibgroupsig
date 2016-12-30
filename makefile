@@ -3,6 +3,7 @@ FLAGS= -Wall -std=gnu99 -pedantic -O3 -Wcomment
 
 SSLLIBS= -lssl -lcrypto
 GSLIBS = -lgroupsig
+TIMETEST = -D TIMETEST
 all: server cliente
 
 server: chatS src/server.c
@@ -10,6 +11,9 @@ server: chatS src/server.c
 
 cliente: chatC src/cliente.c
 	@gcc $(FLAGS) -o cliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses $(SSLLIBS) $(GSLIBS)
+
+
+
 
 # OBJETOS CHAT
 
@@ -82,6 +86,10 @@ testGS: obj test/serverGS.c test/clientGS.c obj/funcionesGS.o obj/conexion.o
 
 testBan: obj/parser.o test/bans.c
 	@gcc $(FLAGS) -o TestBan test/bans.c obj/*
+
+testTimeServer: chatS src/server.c
+	@gcc $(FLAGS) -o Testserver src/server.c obj/*.o objS/*.o -lpthread $(SSLLIBS) $(GSLIBS) $(TIMETEST)
+
 
 # DIRECTORIOS
 

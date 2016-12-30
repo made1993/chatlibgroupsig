@@ -119,13 +119,14 @@ int main(int argc , char *argv[]){
 	int key_format;
 
 	char s_grpkey[] = ".fg/group/grp.key";
-	char s_memkey[] = ".fg/members/3.key";
 	char s_pubKey[] = "pubkey.pub";
+	char* s_memkey = NULL;
 
 	static struct option options[] = {
         {"ip",required_argument,0, 1},
         {"port",required_argument,0, 2},
         {"nick",required_argument,0, 3},
+        {"memkey",required_argument,0, 4},
 
         {0,0,0,0}
     };
@@ -151,24 +152,35 @@ int main(int argc , char *argv[]){
 				strcpy(nick, optarg);
 
 			break;
+			case 4:
+				s_memkey = malloc(sizeof(char) * strlen(optarg) + 1);
+				strcpy(s_memkey, optarg);
+			break;
 		}
 	}
 	/*Chequeo de que los argumentos esten bien*/
 	if(ip == NULL){
 		printf("No se especifico la direccion destino\n");
-		printf("-ip arg -port arg -nick arg\n");
+		printf("-ip arg -port arg -nick arg -memkey arg\n");
 		return 0;
 	}
 	if(port == NULL){
 
 		printf("No se especifico la puerto destino\n");
-		printf("-ip arg -port arg -nick arg\n");
+		printf("-ip arg -port arg -nick arg -memkey arg\n");
 		return 0;	
 	}
 	if(nick == NULL){
 
 		printf("No se especifico el nick\n");
-		printf("-ip arg -port arg -nick arg\n");
+		printf("-ip arg -port arg -nick arg -memkey arg\n");
+		return 0;
+	}
+
+	if(s_memkey == NULL){
+
+		printf("No se especifico la clave de miembro\n");
+		printf("-ip arg -port arg -nick arg -memkey arg\n");
 		return 0;
 	}
 	memset(&hints, 0, sizeof hints);

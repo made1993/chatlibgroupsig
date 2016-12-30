@@ -83,13 +83,26 @@ void* controlDeConexion(void* args){
 	Node* nd = NULL;
 	Usuario_t* usr = NULL;
 	unsigned int pingt;
+	#ifdef TIMETEST 
+	clock_t ini, fin, tot;
+	FILE* f = NULL;
+	fopen("tmedioenv.dat", "w");
+	#endif
 	while(1){
 		nd = listaUsuarios->first;
 		while (nd != NULL){
 			usr = (Usuario_t*) nd->data;
 			pingt = getPingt(usr);
 			if((unsigned)time(NULL)- pingt > PING_TIME){
+				#ifdef TIMETEST
+				ini = clock();
 				sendPing(usr);
+				fin = clock();
+				tot = fin-ini;
+				fprintf(f, "%ld\n", tot);
+				#else
+				sendPing(usr);
+				#endif
 			}
 			else if((unsigned)time(NULL) - pingt > PING_MAX){
 				sendDisconnect(usr);

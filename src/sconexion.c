@@ -279,8 +279,10 @@ int serverInitSConexion(Sconexion_t* scnx, groupsig_key_t *mgrkey, crl_t* crl, g
 	if(!verifySignGS(sigstr, scnx->grpkey, msg, scnx->scheme))
 		return 0;
 
-	if(traceSignGS(sigstr, scnx->grpkey, mgrkey, crl, gml, scnx->scheme))
+	if(traceSignGS(sigstr, scnx->grpkey, mgrkey, crl, gml, scnx->scheme)){
+		fprintf(stderr, "Clave revocada.\n");
 		return 0;
+	}
 
 	/*DERIVE AES KEY*/
 	msgToDHpubKey(&DHpeerKey, msg, msglen);
