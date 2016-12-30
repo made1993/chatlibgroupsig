@@ -1,5 +1,8 @@
 #include "../include/sconexion.h"
 
+#ifdef TIMETESTD
+
+#endif
 Sconexion_t* initSconexion(int socket, groupsig_key_t *grpkey,
 		groupsig_key_t *memkey, int scheme, EVP_PKEY* keyRSA){
 	Sconexion_t* scnx;
@@ -45,21 +48,50 @@ int freeSconexion(Sconexion_t* scnx){
 int sendClientCiphMsg(Sconexion_t* scnx,const unsigned char* text, int textlen){
 	int msglen = 0, bufflen = 0, siglen = 0;
 	char*  msg = NULL, *buff = NULL, *sigstr;
-	FILE* f = NULL;
+	//FILE* f = NULL;
+
+	#ifdef TIMETESTD
+	clock_t ini, fin, totc, tots;
+	FILE * f = NULL;
+	f =fopen("tmedioCd.dat","a");
+	#endif
+
 	if(scnx == NULL || scnx->socket == -1 || scnx->ctx == NULL || scnx->key == NULL ||
 		scnx->iv == NULL || text == NULL || textlen < 1 || scnx->grpkey == NULL || 
 		scnx->memkey == NULL)
 		return 0;
-	f = fopen("csend.txt", "a");
+	//f = fopen("csend.txt", "a");
 
-
+	#ifdef TIMETESTD
+	ini =  clock();
+	siglen = signMsgGS(scnx->grpkey, scnx->memkey, scnx->scheme, (char*)text, &sigstr);
+	msglen = sigMsgToStrGS((char*)text, textlen, sigstr, siglen, &msg);	
+	fin =  clock();
+	tots = fin - ini;
+	#else
 	siglen = signMsgGS(scnx->grpkey, scnx->memkey, scnx->scheme, (char*)text, &sigstr);
 	msglen = sigMsgToStrGS((char*)text, textlen, sigstr, siglen, &msg);
+	#endif
+	
+	#ifdef TIMETESTD
+	ini =  clock();
+	bufflen = encrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)msg,
+				(unsigned char**)&buff, msglen);
+
+	fin =  clock();
+	totc = fin - ini;
+	fprintf(f, "%ld %ld\n", tots, totc);
+	fclose(f);
+	#else
 
 	bufflen = encrypt_cbc256(scnx->ctx, scnx->key, scnx->iv, (const unsigned char*)msg,
 				(unsigned char**)&buff, msglen);
-	fprintf(f, "bufflen: %d siglen:%d msg:%d :%s\n", bufflen, siglen , textlen, text);
-	fclose(f);
+	#endif
+
+	
+
+	//fprintf(f, "bufflen: %d siglen:%d msg:%d :%s\n", bufflen, siglen , textlen, text);
+	//fclose(f);
 	
 	
 	if(bufflen <1)

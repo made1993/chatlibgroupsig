@@ -4,6 +4,7 @@ FLAGS= -Wall -std=gnu99 -pedantic -O3 -Wcomment
 SSLLIBS= -lssl -lcrypto
 GSLIBS = -lgroupsig
 TIMETEST = -D TIMETEST
+TIMETESTD = -D TIMETESTD
 all: server cliente
 
 server: chatS src/server.c
@@ -88,7 +89,15 @@ testBan: obj/parser.o test/bans.c
 	@gcc $(FLAGS) -o TestBan test/bans.c obj/*
 
 testTimeServer: chatS src/server.c
-	@gcc $(FLAGS) -o Testserver src/server.c obj/*.o objS/*.o -lpthread $(SSLLIBS) $(GSLIBS) $(TIMETEST)
+	@gcc $(FLAGS) -o TestServer src/server.c obj/*.o objS/*.o -lpthread $(SSLLIBS) $(GSLIBS) $(TIMETEST)
+
+testTimeCliente: chatC src/cliente.c
+	@gcc $(FLAGS) -o TestCliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses $(SSLLIBS) $(GSLIBS) $(TIMETEST)
+
+testTimeClienteD: chatC src/cliente.c
+	@gcc $(FLAGS) -c -o obj/sconexion.o src/sconexion.c $(TIMETESTD)
+	@gcc $(FLAGS) -o TestCliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses $(SSLLIBS) $(GSLIBS) $(TIMETESTD)
+
 
 
 # DIRECTORIOS
@@ -111,8 +120,8 @@ RSAkeys:
 #LIMPIEZA
 
 mrProper:
-	@rm -f obj/* objS/* objC/* server cliente funcionesDH funcionesAES Test* main funciones* main
-	@rm -f *.txt
+	@rm -fv obj/* objS/* objC/* server cliente funcionesDH funcionesAES Test* main funciones* main
+	@rm -fv *.txt
 #GIT
 
 commit:

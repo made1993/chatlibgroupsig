@@ -16,6 +16,9 @@
 
 pthread_t h1, h2;
 char* nick;
+#ifdef TIMETEST
+FILE *f = NULL;
+#endif
 
 Sconexion_t* scnx = NULL;
 
@@ -65,6 +68,9 @@ void* hiloEscritura(void* args){
 void* hiloLectura(void* args){
 	char* msg = NULL;
 	int end = 0, ret = 0;
+	#ifdef TIMETEST
+	clock_t ini, fin, tot;
+	#endif
 	if(scnx == NULL)
 		return NULL;
 	while(!end){
@@ -83,7 +89,15 @@ void* hiloLectura(void* args){
 				end = 1;
 			break;
 			case PING:
+				#ifdef TIMETEST
+				ini = clock();
 				recvPing(scnx);
+				fin = clock();
+				tot = fin - ini;
+				fprintf(f, "%ld\n", tot);
+				#else
+				recvPing(scnx);
+				#endif
 			break;
 			case PONG:
 				recvPong();
@@ -188,7 +202,9 @@ int main(int argc , char *argv[]){
 	hints.ai_socktype = SOCK_STREAM;
 
 	
-
+	#ifdef TIMETEST
+	f = fopen("temedioenvioC.dat", "a");
+	#endif
 	/*Comenzamos la conexion TCP*/
 	if(0!=getaddrinfo(ip, port, &hints, &res)){
 		printf("No se pudo conectar con el servidor\n");
@@ -253,6 +269,10 @@ int main(int argc , char *argv[]){
 	pthread_join(h1, &thstatus);
 	close(sockfd);
 	free(nick);
+
+	#ifdef TIMETEST
+	fclose(f);
+	#endif
 	
 	return 0;
  

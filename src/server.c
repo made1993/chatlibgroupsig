@@ -8,13 +8,12 @@
 #include "../include/comandoss.h"
 
 #ifdef TIMETEST
-#define PING_SLEEP 4
+#define PING_SLEEP 10
 #define PING_TIME 1
-
 #else
 
-#define PING_SLEEP 30
-#define PING_TIME 30
+#define PING_SLEEP 3
+#define PING_TIME 1
 
 #endif
 
