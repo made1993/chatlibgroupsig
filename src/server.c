@@ -3,21 +3,22 @@
 #include <arpa/inet.h> //inet_addr
 #include <unistd.h>	//write
 #include <pthread.h>
+#include <signal.h>
 
 #include "../include/comandoss.h"
-#define PING_MAX 60
+
 #ifdef TIMETEST
+#define PING_SLEEP 4
+#define PING_TIME 1
+
+#else
 
 #define PING_SLEEP 30
 #define PING_TIME 30
 
-#else
-
-#define PING_SLEEP 1
-#define PING_TIME 1
-
 #endif
 
+#define PING_MAX 60
 pthread_t* hilos;
 
 LinkedList* listaUsuarios;
@@ -29,6 +30,62 @@ crl_t* crl = NULL;
 gml_t* gml = NULL;
 char* s_crlf = NULL;
 int scheme = GROUPSIG_CPY06_CODE;
+
+#ifdef TIMETEST
+FILE* f = NULL;
+#endif
+
+void sig_handler(int signo){
+	if (signo == SIGINT || signo == SIGTERM){
+		#ifdef TIMETEST
+		fclose(f);
+		#endif
+    	printf("received end signal\n");
+	}
+	exit(0);
+}
+
+
+void* controlDeConexion(void* args){
+	Node* nd = NULL;
+	Usuario_t* usr = NULL;
+	unsigned int pingt;
+	#ifdef TIMETEST 
+	clock_t ini, fin, tot;
+	
+	f =fopen("tmedioenv.dat", "w");
+	#endif
+	while(1){
+		nd = listaUsuarios->first;
+		while (nd != NULL){
+			printf("PING\n");
+			usr = (Usuario_t*) nd->data;
+			pingt = getPingt(usr);
+			if((unsigned)time(NULL)- pingt > PING_TIME){
+				#ifdef TIMETEST
+				ini = clock();
+				sendPing(usr);
+				fin = clock();
+				tot = fin-ini;
+				fprintf(f, "%ld\n", tot);
+				#else
+				sendPing(usr);
+				#endif
+			}
+			else if((unsigned)time(NULL) - pingt > PING_MAX){
+				sendDisconnect(usr);
+				delete_elem_list(listaUsuarios, (void*) usr);
+				liberarUsuario(usr);
+				free(usr);
+				usr = NULL;
+
+			}
+			nd= nd->next;
+		}
+		sleep(PING_SLEEP);
+	}
+}
+
 
 void* verificarCliente(void* args){
 	int* socket = NULL;
@@ -87,44 +144,6 @@ void* verificarCliente(void* args){
 	return usr;
 }
 
-void* controlDeConexion(void* args){
-	Node* nd = NULL;
-	Usuario_t* usr = NULL;
-	unsigned int pingt;
-	#ifdef TIMETEST 
-	clock_t ini, fin, tot;
-	FILE* f = NULL;
-	f =fopen("tmedioenv.dat", "w");
-	#endif
-	while(1){
-		nd = listaUsuarios->first;
-		while (nd != NULL){
-			usr = (Usuario_t*) nd->data;
-			pingt = getPingt(usr);
-			if((unsigned)time(NULL)- pingt > PING_TIME){
-				#ifdef TIMETEST
-				ini = clock();
-				sendPing(usr);
-				fin = clock();
-				tot = fin-ini;
-				fprintf(f, "%ld\n", tot);
-				#else
-				sendPing(usr);
-				#endif
-			}
-			else if((unsigned)time(NULL) - pingt > PING_MAX){
-				sendDisconnect(usr);
-				delete_elem_list(listaUsuarios, (void*) usr);
-				liberarUsuario(usr);
-				free(usr);
-				usr = NULL;
-
-			}
-			nd= nd->next;
-		}
-		sleep(PING_SLEEP);
-	}
-}
 
 void* lecturaUsuario(void* args){
 	char * buff = NULL;
@@ -226,6 +245,12 @@ int main(){
 		return 0;
 	}
 
+	/*CONFIGURACION DE SEÑAELS DEL SISTEMA*/
+	
+	if (signal(SIGINT, sig_handler) == SIG_ERR)
+		printf("\ncan't catch SIGINT\n");
+	if(signal(SIGTERM, sig_handler) == SIG_ERR)
+		printf("\ncan't catch SIGTERM\n");
 	/*INICIAIZACION DE COSAS VARIAS*/
 	iniBigBrother(NULL);
 	groupsig_init(time(NULL));
