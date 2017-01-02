@@ -93,6 +93,11 @@ int sendPong(Sconexion_t* scnx){
 int recvNick(char* msg){
 	char* nick1 = NULL, *nick2 = NULL;
 	char* str;
+	
+	FILE* f = fopen("trash.txt", "a");
+	fprintf(f, "%s\n", msg);
+	fclose(f);
+
 	parseNick(msg, &nick1, &nick2);
 	if(nick1 == NULL){
 		printMsg("NICK ERROR");
@@ -105,29 +110,34 @@ int recvNick(char* msg){
 	}else{
 		str =  malloc(strlen(nick1) + strlen(nick2) + strlen((char*)"ahora es") + 3);
 		sprintf(str, "%s ahora es %s",nick1, nick2);
-		
+
+		if(strcmp(nick, nick1) == 0){
+			free(nick);
+			nick =  nick2;
+		}
+		else
+			free(nick2);
 	}
 	printMsg(str);
 	free(str);
 	free(nick1);
-	free(nick2);
 	return 0;
 }
 
 int recvMsg(char* msg){
-	char* nick = NULL;
+	char* nickl = NULL;
 	char* content = NULL;
 	char* str =  NULL;
 	FILE* f;
 	f = fopen("trash.txt", "a");
 	fprintf(f, "%s\n", msg);
 	
-	parseMsg(msg, &nick, &content);
-	str = malloc(strlen(nick) + strlen(content) +2);
-	sprintf(str, "%s: %s", nick, content);
+	parseMsg(msg, &nickl, &content);
+	str = malloc(strlen(nickl) + strlen(content) +2);
+	sprintf(str, "%s: %s", nickl, content);
 	printMsg(str);
 	free(str);
-	free(nick);
+	free(nickl);
 	free(content);
 	fclose(f);
 	return 0;

@@ -77,12 +77,12 @@ int recvNick(Usuario_t* usr, char* msg){
 	
 	if (usr == NULL || msg== NULL)
 		return -1;
+	printf("NICK[%s]\n", msg);
 
 	parseNick(msg, &nick1, &nick2);
 	if(nick2 != NULL)
 		return -1;
 	sendNick(usr, nick1);
-
 	setNick(usr, nick1);
 	free(nick1);
 	free(nick2);

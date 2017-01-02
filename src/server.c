@@ -12,8 +12,8 @@
 #define PING_TIME 1
 #else
 
-#define PING_SLEEP 3
-#define PING_TIME 1
+#define PING_SLEEP 30
+#define PING_TIME 30
 
 #endif
 
