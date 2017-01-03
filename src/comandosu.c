@@ -90,6 +90,7 @@ int sendPong(Sconexion_t* scnx){
 	//return escribir(socket, CPONG, strlen(CPONG)+1);
 }
 
+
 int recvNick(char* msg){
 	char* nick1 = NULL, *nick2 = NULL;
 	char* str;
