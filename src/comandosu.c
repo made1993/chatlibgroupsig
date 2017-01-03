@@ -91,7 +91,6 @@ int sendPong(Sconexion_t* scnx){
 }
 
 
-
 int recvNick(char* msg){
 	char* nick1 = NULL, *nick2 = NULL;
 	char* str;
