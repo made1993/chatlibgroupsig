@@ -90,6 +90,11 @@ void* verificarCliente(void* args){
 	int* socket = NULL;
 	char * buff = NULL;
 	int bufflen;
+	#ifdef INISCTEST
+	clock_t ini, fin, tot;
+	FILE *f;
+	f = fopen("iniscnxS.dat", "a");
+	#endif
 
 	socket = (int*) args;
 	Usuario_t* usr = NULL;
@@ -104,6 +109,11 @@ void* verificarCliente(void* args){
 		usr = NULL;
 		return NULL;
 	}
+	
+	#ifdef INISCTEST
+	ini = clock();
+	#endif
+
 	if(!serverInitSConexion(usr->scnx, mgrkey, crl, gml)){
 		fprintf(stdout, "Error: failure creating secure conexion.\n");
 		liberarUsuario(usr);
@@ -111,6 +121,15 @@ void* verificarCliente(void* args){
 		usr = NULL;
 		return NULL;
 	}
+
+
+	#ifdef INISCTEST
+	fin = clock();
+	tot = fin - ini;
+	fprintf(f, "%ld\n", tot);
+	fclose(f);
+	#endif
+
 	while(1){
 
 		bufflen = reciveServerCiphMsg(usr->scnx, &buff);

@@ -5,6 +5,7 @@ SSLLIBS= -lssl -lcrypto
 GSLIBS = -lgroupsig
 TIMETEST = -D TIMETEST
 TIMETESTD = -D TIMETESTD
+INISCTEST = -D INISCTEST
 all: server cliente
 
 server: chatS src/server.c
@@ -98,6 +99,13 @@ testTimeClienteD: chatC src/cliente.c
 	@gcc $(FLAGS) -c -o obj/sconexion.o src/sconexion.c $(TIMETESTD)
 	@gcc $(FLAGS) -o TestCliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses $(SSLLIBS) $(GSLIBS) $(TIMETESTD)
 
+
+testTimeIniCnxCliente: chatC src/cliente.c
+	@gcc $(FLAGS) -o TestCliente src/cliente.c obj/*.o  objC/*.o -lpthread -lncurses $(SSLLIBS) $(GSLIBS) $(INISCTEST)
+
+
+testTimeIniCnxServer: chatS src/server.c
+	@gcc $(FLAGS) -o TestServer src/server.c obj/*.o objS/*.o -lpthread $(SSLLIBS) $(GSLIBS) $(INISCTEST)
 
 
 # DIRECTORIOS

@@ -135,7 +135,12 @@ int main(int argc , char *argv[]){
 	char s_grpkey[] = ".fg/group/grp.key";
 	char s_pubKey[] = "pubkey.pub";
 	char* s_memkey = NULL;
-
+	
+	#ifdef INISCTEST
+	clock_t ini, fin, tot;
+	FILE *f;
+	f = fopen("iniscnxC.dat", "a");
+	#endif
 	static struct option options[] = {
         {"ip",required_argument,0, 1},
         {"port",required_argument,0, 2},
@@ -251,10 +256,20 @@ int main(int argc , char *argv[]){
 		return IERROR;
 	}
 
+	#ifdef INISCTEST
+	ini = clock();
+	#endif
+
 	scnx = initSconexion(sockfd, grpkey, memkey, scheme, pubKeyRSA);
 	if(scnx == NULL || !clientInitSConexion(scnx))
 		return 0;
 	
+	#ifdef INISCTEST
+	fin = clock();
+	tot = fin - ini;
+	fprintf(f, "%ld\n", tot);
+	fclose(f);
+	#endif
 
 	/*Conexion chat*/
 	identificacion(nick);
